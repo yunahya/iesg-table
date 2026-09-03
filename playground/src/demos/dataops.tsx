@@ -216,7 +216,7 @@ export function RowReorder() {
       ]}
       caveats={[
         '순서는 원본 배열에 적용됩니다. 정렬이 걸려 있으면 정렬이 이깁니다 — 드래그로 순서를 정하는 화면에서는 정렬을 꺼두는 편이 자연스럽습니다.',
-        '서브행 트리에서는 최상위 행 순서만 바뀝니다.',
+        '뎁스 있는 테이블에서는 최상위 행 순서만 바뀝니다.',
       ]}
     >
       <div className='space-y-3'>
@@ -277,6 +277,10 @@ export function ColumnReorder() {
           개별 컬럼을 빼려면 <Code>meta.reorderable: false</Code>를 주세요.
         </>,
         '고정(pinned)된 컬럼도 자동으로 제외됩니다.',
+        <>
+          <Code>enableColumnResizing</Code>과 함께 켜면 <strong>폭 조절이 우선</strong>입니다 — 헤더 오른쪽 끝 손잡이
+          위에서는 헤더가 드래그되지 않습니다. 두 동작이 똑같이 시작되기 때문에, 더 작고 의도적인 쪽에 양보합니다.
+        </>,
         <>
           저장은 <Code>usePersistedState</Code> 훅으로 합니다. 컬럼 폭·표시 여부·정렬 등 다른 제어 상태에도 똑같이
           씁니다. 테이블이 스스로 저장소에 쓰지는 않습니다 — 키 이름과 저장 여부는 사용자가 정합니다.

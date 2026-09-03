@@ -236,8 +236,8 @@ const FEATURES: ReactNode[][] = [
     </span>,
   ],
   [
-    '행 확장 · 서브행',
-    '트리(getSubRows) 또는 전체 폭 커스텀 패널(renderSubRow)',
+    '행 확장',
+    '뎁스 있는 테이블(getSubRows, 깊이 제한 없음) 또는 테이블 토글(renderSubRow)',
     <Code key='k'>expanded</Code>,
     <span key='o'>
       <Origin kind='mixed' />
@@ -347,7 +347,7 @@ const FEATURES: ReactNode[][] = [
 
 const NOT_YET: ReactNode[][] = [
   ['진짜 .xlsx 파일 생성', 'zip 라이터가 필요합니다. tableToMatrix()를 SheetJS·exceljs에 넘기세요'],
-  ['가상화 + renderSubRow 패널', '패널이 행-인덱스 매핑을 깨뜨립니다. 서브행 트리는 가능합니다'],
+  ['가상화 + 테이블 토글', '토글 영역이 행-인덱스 매핑을 깨뜨립니다. 뎁스 있는 테이블은 가능합니다'],
   ['드래그 중 자동 스크롤', '긴 목록에서 화면 밖으로 끌 때 스크롤이 따라가지 않습니다'],
   ['터치 드래그', 'HTML5 드래그앤드롭 기반이라 모바일에서는 방향키 이동을 쓰세요'],
   ['다중 헤더 그룹 정렬', 'colSpan 헤더는 프리미티브로 직접 조합해야 합니다'],
@@ -442,7 +442,7 @@ const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
   },
   {
     title: '행 확장',
-    note: '펼침 아이콘과 커스텀 패널 배경',
+    note: '펼침 아이콘과 토글 영역 배경',
     tokens: ['--tbl-expander-fg', '--tbl-subrow-bg'],
   },
   {

@@ -716,11 +716,27 @@ check('shallow identity guard', '', [
     <DataTable data={data.slice(0, 1)} columns={alignColumns} getRowId={(r) => r.id} labels={labels} />,
   );
   const body = html.slice(html.indexOf('<tbody'));
+  // `columns` carries the selection column, whose checkbox centres itself.
+  const selectionHtml = renderToStaticMarkup(
+    <DataTable
+      data={data}
+      columns={columns}
+      getRowId={(r) => r.id}
+      labels={labels}
+      rowSelection={{ selectedIds: [], onChange: () => {} }}
+    />,
+  );
+  const selectionBody = selectionHtml.slice(selectionHtml.indexOf('<tbody'));
+
   check('cell alignment', html, [
     // text-align does nothing to a flex item sized to its content; the fix is
     // justify-content, and this is the regression guard for it.
     ['center becomes justify-center', body.includes('justify-center')],
     ['left is explicit rather than implied', body.includes('justify-start')],
+    // Regression: a column with no explicit align used to resolve to `left`,
+    // which then overrode the checkbox type's own centring.
+    ['a checkbox cell keeps its centring', selectionBody.includes('justify-center')],
+    ['and is not pushed to the start', !selectionBody.includes('justify-start')],
     [
       'numeric columns still right-align themselves',
       renderToStaticMarkup(

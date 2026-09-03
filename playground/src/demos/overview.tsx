@@ -98,7 +98,7 @@ const DEFAULTS: Features = {
 const SWITCHES: { key: FeatureKey; label: string; prop: string }[] = [
   { key: 'selection', label: '행 선택', prop: 'rowSelection' },
   { key: 'drag', label: '행 순서 변경', prop: 'enableRowDragging' },
-  { key: 'expansion', label: '행 확장(트리)', prop: 'getSubRows' },
+  { key: 'expansion', label: '뎁스 있는 테이블', prop: 'getSubRows' },
   { key: 'sorting', label: '정렬', prop: 'sorting' },
   { key: 'filter', label: '전역 검색', prop: 'globalFilter' },
   { key: 'visibility', label: '컬럼 표시', prop: 'columnVisibility' },
@@ -115,7 +115,7 @@ const SWITCHES: { key: FeatureKey; label: string; prop: string }[] = [
 /** Pairs that cannot both be on, and the reason. */
 const CONFLICTS: Partial<Record<FeatureKey, { with: FeatureKey; why: string }>> = {
   grouping: { with: 'expansion', why: '그룹핑이 스스로 하위 행을 만들기 때문에 getSubRows를 무시합니다' },
-  expansion: { with: 'grouping', why: '그룹핑이 켜져 있으면 트리는 무시됩니다' },
+  expansion: { with: 'grouping', why: '그룹핑이 켜져 있으면 뎁스는 무시됩니다' },
   virtual: { with: 'pagination', why: '페이지로 잘라 놓고 가상화할 이유가 없습니다' },
   pagination: { with: 'virtual', why: '가상화가 이미 렌더링 양을 제한합니다' },
 };
@@ -241,7 +241,7 @@ export function Overview() {
           <Code>grouping</Code>과 <Code>getSubRows</Code>는 동시에 못 씁니다. 그룹핑이 하위 행을 직접 만듭니다.
         </>,
         <>
-          <Code>virtual</Code>과 <Code>renderSubRow</Code> 패널도 동시에 못 씁니다. 트리 방식은 가능합니다.
+          <Code>virtual</Code>과 테이블 토글(<Code>renderSubRow</Code>)도 동시에 못 씁니다. 뎁스 방식은 가능합니다.
         </>,
         '행 드래그와 정렬이 둘 다 켜져 있으면 정렬이 이깁니다 — 드래그로 순서를 정하는 화면에서는 정렬을 끄세요.',
       ]}

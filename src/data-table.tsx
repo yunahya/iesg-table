@@ -219,8 +219,13 @@ function headerAlign<TData>(meta?: TableColumnMeta<TData>): Align {
   return meta?.headerAlign ?? meta?.align ?? (meta?.numeric ? 'right' : 'left');
 }
 
-function cellAlign<TData>(meta?: TableColumnMeta<TData>): Align {
-  return meta?.align ?? (meta?.numeric ? 'right' : 'left');
+/**
+ * Undefined means "let the cell type decide" — a checkbox centres itself, a
+ * number right-aligns itself. Returning a concrete `left` here would override
+ * those defaults instead of falling back to them.
+ */
+function cellAlign<TData>(meta?: TableColumnMeta<TData>): Align | undefined {
+  return meta?.align ?? (meta?.numeric ? 'right' : undefined);
 }
 
 function numeric(value: number | string | undefined): number | undefined {
@@ -511,6 +516,10 @@ export function DataTable<TData>({
 
   const [rowDragState, setRowDragState] = useState<DragState>(EMPTY_DRAG);
   const [columnDragState, setColumnDragState] = useState<DragState>(EMPTY_DRAG);
+  // Which column's resize grip the pointer is on. The grip sits inside the
+  // header, and a draggable header would swallow the drag as a reorder, so the
+  // header stops being draggable while the pointer is over its grip.
+  const [gripColumnId, setGripColumnId] = useState<string | null>(null);
 
   const moveRow = useCallback(
     (id: string, direction: -1 | 1) => {
@@ -640,7 +649,9 @@ export function DataTable<TData>({
               const headerTruncates = meta?.truncate ?? type !== 'custom';
               const align = headerAlign(meta);
               const pinned = column.getIsPinned();
-              const draggableColumn = canReorderColumn(column);
+              // Resizing wins over reordering: the two gestures start the same
+              // way, and the grip is the smaller, more deliberate target.
+              const draggableColumn = canReorderColumn(column) && gripColumnId !== column.id && !column.getIsResizing();
               const columnDropTarget =
                 columnDragState.activeId != null &&
                 columnDragState.activeId !== column.id &&
@@ -744,10 +755,18 @@ export function DataTable<TData>({
                     <button
                       type='button'
                       tabIndex={-1}
+                      data-tbl-resize-grip=''
                       aria-label={`resize ${column.id}`}
+                      // Hover covers the mouse; pointerdown is a discrete event,
+                      // so it flushes before dragstart for anything that arrives
+                      // on the grip without hovering first.
+                      onPointerDown={() => setGripColumnId(column.id)}
+                      onMouseEnter={() => setGripColumnId(column.id)}
+                      onMouseLeave={() => setGripColumnId((current) => (current === column.id ? null : current))}
                       onMouseDown={header.getResizeHandler()}
                       onTouchStart={header.getResizeHandler()}
                       onClick={(event) => event.stopPropagation()}
+                      onDragStart={(event) => event.preventDefault()}
                       className={cn(
                         'absolute top-0 right-0 h-full cursor-col-resize touch-none select-none',
                         'w-[var(--tbl-resize-handle-width)] bg-[var(--tbl-resize-handle)]',
@@ -907,7 +926,12 @@ function DataCell<TData>({
     tone: meta?.tone ?? 'none',
     line: meta?.line ?? true,
     rightStroke: meta?.rightStroke ?? true,
-    className: cn(alignClassName[align], truncate && 'max-w-0 truncate', pinned && 'sticky z-10', meta?.className),
+    className: cn(
+      alignClassName[align ?? 'left'],
+      truncate && 'max-w-0 truncate',
+      pinned && 'sticky z-10',
+      meta?.className,
+    ),
     style: pinStyle(column),
     truncate,
   } as const;

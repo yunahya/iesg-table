@@ -456,7 +456,7 @@ export function CustomCells() {
     >
       <div className='space-y-3'>
         <DataTable data={rows} columns={columns} getRowId={(row) => row.id} labels={labels} />
-     
+
         <pre className='rounded border border-slate-200 bg-slate-50 p-2 font-mono text-[11px] text-slate-700'>
           {JSON.stringify(
             rows.map(({ id, due, progress, status }) => ({ id, due, progress, status })),

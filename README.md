@@ -310,7 +310,7 @@ Or a full-width panel under the row:
 ```
 
 Sub-rows are ordinary rows, so sorting, filtering and selection apply to them and `row.depth` drives
-the indent. `renderSubRow` cannot be combined with virtualisation — a panel breaks the fixed
+the indent, at any depth. `renderSubRow` cannot be combined with virtualisation — a panel breaks the fixed
 row-to-index mapping.
 
 ## Resizing, sticky header, pinned columns
@@ -425,6 +425,10 @@ appended rows are never dropped.
 Header cells become draggable. The selection, expander and drag-grip columns are excluded because
 their position is structural, as are pinned columns; opt a column out with `meta.reorderable: false`.
 Clicking a header still sorts — a drag needs movement, so the two do not collide.
+
+With `enableColumnResizing` on as well, the resize grip wins: the header stops being draggable while
+the pointer is over it, so dragging the edge resizes and dragging anywhere else reorders. Both
+gestures start the same way, and the grip is the smaller, more deliberate target.
 
 ## Grouping and aggregation
 

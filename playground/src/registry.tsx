@@ -50,7 +50,7 @@ export const GROUPS: Group[] = [
   {
     title: '레이아웃',
     entries: [
-      { id: 'expansion', label: '행 확장', hint: '서브행 트리 · 커스텀 패널', Component: Expansion },
+      { id: 'expansion', label: '행 확장', hint: '테이블 토글 · 뎁스 있는 테이블', Component: Expansion },
       { id: 'resizing', label: '컬럼 폭 조절', hint: '드래그로 폭 바꾸기', Component: Resizing },
       { id: 'sticky', label: '헤더 · 컬럼 고정', hint: '스크롤해도 남는 영역', Component: StickyAndPinning },
       { id: 'virtual', label: '가상화', hint: '10,000행도 가볍게', Component: Virtualised },

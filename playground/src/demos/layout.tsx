@@ -17,90 +17,173 @@ import { Code, DemoPage, Note, btn, btnOn, input } from '../ui';
 
 type Node = { id: string; name: string; amount: number; note: string; children?: Node[] };
 
+/** Leaves carry the numbers; every parent is the sum of what is under it. */
+function rollUp(node: Node): Node {
+  if (!node.children?.length) return node;
+  const children = node.children.map(rollUp);
+  return { ...node, children, amount: children.reduce((total, child) => total + child.amount, 0) };
+}
+
 const tree: Node[] = [
   {
     id: 's1',
     name: 'Scope 1 · 직접 배출',
-    amount: 15690.5,
+    amount: 0,
     note: '연료 연소',
     children: [
-      { id: 's1a', name: '고정연소', amount: 12480.5, note: '보일러·발전기' },
-      { id: 's1b', name: '이동연소', amount: 3210, note: '사업장 차량' },
+      {
+        id: 's1-1',
+        name: '고정연소',
+        amount: 0,
+        note: '보일러 · 발전기',
+        children: [
+          {
+            id: 's1-1-1',
+            name: '무연탄',
+            amount: 0,
+            note: '고체연료',
+            children: [
+              { id: 's1-1-1-a', name: '울산 1공장 · 1호기', amount: 6240.5, note: '2026-01 검침' },
+              { id: 's1-1-1-b', name: '울산 1공장 · 2호기', amount: 3180.0, note: '2026-01 검침' },
+              { id: 's1-1-1-c', name: '여수 2공장 · 1호기', amount: 1860.25, note: '2026-01 검침' },
+            ],
+          },
+          {
+            id: 's1-1-2',
+            name: 'LNG',
+            amount: 0,
+            note: '기체연료',
+            children: [
+              { id: 's1-1-2-a', name: '울산 1공장 · 발전기', amount: 940.75, note: '공급사 명세' },
+              { id: 's1-1-2-b', name: '서울 본사 · 난방', amount: 258.5, note: '공급사 명세' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 's1-2',
+        name: '이동연소',
+        amount: 0,
+        note: '사업장 차량',
+        children: [
+          {
+            id: 's1-2-1',
+            name: '경유',
+            amount: 0,
+            note: '법인 차량',
+            children: [
+              { id: 's1-2-1-a', name: '물류 트럭 12대', amount: 2410.0, note: '주유 카드' },
+              { id: 's1-2-1-b', name: '지게차 8대', amount: 512.4, note: '주유 카드' },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
     id: 's2',
     name: 'Scope 2 · 간접 배출',
-    amount: 9205.25,
+    amount: 0,
     note: '구매 에너지',
     children: [
-      { id: 's2a', name: '구매전력', amount: 8790.25, note: '한국전력' },
-      { id: 's2b', name: '구매스팀', amount: 415, note: '지역난방' },
+      {
+        id: 's2-1',
+        name: '구매전력',
+        amount: 0,
+        note: '한국전력',
+        children: [
+          {
+            id: 's2-1-1',
+            name: '고압 A',
+            amount: 0,
+            note: '산업용',
+            children: [
+              { id: 's2-1-1-a', name: '울산 1공장', amount: 5820.25, note: '월별 고지서' },
+              { id: 's2-1-1-b', name: '여수 2공장', amount: 2140.0, note: '월별 고지서' },
+            ],
+          },
+          { id: 's2-1-2', name: '일반용', amount: 830.0, note: '서울 본사' },
+        ],
+      },
+      { id: 's2-2', name: '구매스팀', amount: 415.0, note: '지역난방' },
     ],
   },
-  { id: 's3', name: 'Scope 3 · 기타 간접', amount: 24696.05, note: '가치사슬' },
-];
+  { id: 's3', name: 'Scope 3 · 기타 간접', amount: 24696.05, note: '가치사슬 — 하위 분해 예정' },
+].map(rollUp);
 
 const treeColumns: TableColumnDef<Node>[] = [
   createExpanderColumn<Node>(),
-  { accessorKey: 'name', header: '구분', meta: { width: 240 } },
+  { accessorKey: 'name', header: '구분', meta: { width: 320 } },
   {
     accessorKey: 'amount',
     header: 'tCO₂eq',
     meta: { numeric: true, width: 130 },
     cell: (ctx) => num(ctx.getValue<number>()),
   },
-  { accessorKey: 'note', header: '비고', meta: { width: 180, type: 'memo' } },
+  { accessorKey: 'note', header: '비고', meta: { width: 200, type: 'memo' } },
 ];
 
 export function Expansion() {
-  const [expanded, setExpanded] = useState<ExpandedState>({ s1: true });
-  const [mode, setMode] = useState<'tree' | 'panel'>('tree');
+  const [expanded, setExpanded] = useState<ExpandedState>({ s1: true, 's1-1': true });
+  const [mode, setMode] = useState<'depth' | 'toggle'>('depth');
 
   return (
     <DemoPage
       title='행 확장'
       summary={
         <>
-          두 가지 방식이 있습니다. <strong>서브행 트리</strong>는 자식이 진짜 행이 되고, <strong>커스텀 패널</strong>은
-          행 아래 전체 폭 영역에 원하는 걸 그립니다.
+          두 가지 방식이 있습니다. <strong>뎁스 있는 테이블</strong>은 자식이 진짜 행이 되어 몇 단계든 내려갈 수 있고,{' '}
+          <strong>테이블 토글</strong>은 행 아래 전체 폭 영역을 열어 원하는 걸 그립니다.
         </>
       }
       customization={[
         <>
-          트리는 <Code>getSubRows</Code>로 자식 배열을 반환하면 끝입니다. 정렬·필터·선택이 자식 행에도 그대로 적용되고,
-          들여쓰기는 <Code>row.depth</Code>를 따릅니다 (한 단계당 16px).
+          뎁스는 <Code>getSubRows</Code>로 자식 배열을 반환하면 끝입니다. 깊이 제한이 없고, 정렬·필터·선택이 자식 행에도
+          그대로 적용됩니다. 들여쓰기는 <Code>row.depth</Code>를 따릅니다 (한 단계당 16px).
         </>,
         <>
-          패널은 <Code>renderSubRow</Code>가 반환하는 것을 그대로 그립니다 — 폼이든 차트든 상관없습니다. 배경은{' '}
-          <Code>--tbl-subrow-bg</Code>.
+          토글 영역은 <Code>renderSubRow</Code>가 반환하는 것을 그대로 그립니다 — 표든 폼이든 차트든 상관없습니다.
+          배경은 <Code>--tbl-subrow-bg</Code>.
         </>,
         <>
           화살표 컬럼은 <Code>createExpanderColumn()</Code>이고 색은 <Code>--tbl-expander-fg</Code>입니다. 자식이 없는
           행에는 같은 폭의 빈 자리가 들어가 정렬이 흐트러지지 않습니다.
         </>,
+        <>
+          한 번에 다 펼치려면 <Code>expanded={'{true}'}</Code>를 넘기세요.
+        </>,
       ]}
       api={[
-        ['getSubRows', '(row) => TData[]', '트리 방식.'],
-        ['renderSubRow', '(row) => ReactNode', '패널 방식.'],
+        ['getSubRows', '(row) => TData[]', '뎁스 방식. 반환한 배열이 자식 행이 됩니다.'],
+        ['renderSubRow', '(row) => ReactNode', '토글 방식. 행 아래 전체 폭 영역.'],
         ['expanded / onExpandedChange', 'ExpandedState', '펼침 상태. true면 전부 펼칩니다.'],
+        ['row.depth', 'number', '들여쓰기 단계. 화살표가 알아서 씁니다.'],
         ['labels.expandRow', 'string', '화살표 버튼의 접근성 이름.'],
       ]}
       tokens={['--tbl-expander-fg', '--tbl-subrow-bg']}
       caveats={[
         <>
-          <Code>renderSubRow</Code>는 가상화와 함께 쓸 수 없습니다 — 패널이 &lsquo;행 하나당 인덱스 하나&rsquo;라는
-          전제를 깨기 때문입니다. 트리 방식은 실제 행이라 가상화와 문제없이 같이 씁니다.
+          <Code>renderSubRow</Code>는 가상화와 함께 쓸 수 없습니다 — 토글 영역이 &lsquo;행 하나당 인덱스 하나&rsquo;라는
+          전제를 깨기 때문입니다. 뎁스 방식은 실제 행이라 가상화와 문제없이 같이 씁니다.
+        </>,
+        <>
+          그룹핑(<Code>grouping</Code>)이 켜져 있으면 <Code>getSubRows</Code>는 무시됩니다.
         </>,
       ]}
     >
       <div className='space-y-3'>
-        <div className='flex gap-2'>
-          <button type='button' className={mode === 'tree' ? btnOn : btn} onClick={() => setMode('tree')}>
-            서브행 트리
+        <div className='flex flex-wrap gap-2'>
+          <button type='button' className={mode === 'depth' ? btnOn : btn} onClick={() => setMode('depth')}>
+            뎁스 있는 테이블
           </button>
-          <button type='button' className={mode === 'panel' ? btnOn : btn} onClick={() => setMode('panel')}>
-            커스텀 패널
+          <button type='button' className={mode === 'toggle' ? btnOn : btn} onClick={() => setMode('toggle')}>
+            테이블 토글
+          </button>
+          <button type='button' className={btn} onClick={() => setExpanded(true)}>
+            전부 펼치기
+          </button>
+          <button type='button' className={btn} onClick={() => setExpanded({})}>
+            전부 접기
           </button>
         </div>
 
@@ -112,26 +195,52 @@ export function Expansion() {
           getSubRows={(row) => row.children}
           expanded={expanded}
           onExpandedChange={setExpanded}
-          renderSubRow={
-            mode === 'panel'
-              ? (row) => (
-                  <div className='px-4 py-3 text-xs'>
-                    <div className='font-medium text-slate-700'>{row.original.name} 상세</div>
-                    <div className='mt-1 text-slate-500'>
-                      하위 {row.original.children?.length ?? 0}건 · 합계 {num(row.original.amount)} tCO₂eq
-                    </div>
-                  </div>
-                )
-              : undefined
-          }
+          renderSubRow={mode === 'toggle' ? (row) => <SubTable node={row.original} /> : undefined}
         />
         <Note>
-          {mode === 'tree'
-            ? '자식이 실제 행으로 들어옵니다. 화살표를 눌러보세요.'
-            : '같은 데이터에 renderSubRow만 추가했습니다 — 펼치면 표가 아니라 패널이 나옵니다.'}
+          {mode === 'depth'
+            ? '4단계까지 내려갑니다: Scope → 배출원 → 연료 → 설비·사업장. 상위 행의 수치는 아래 행들의 합계입니다.'
+            : '같은 데이터에 renderSubRow만 추가했습니다 — 펼치면 자식이 행으로 끼어드는 대신, 행 아래에 별도의 표가 열립니다.'}
         </Note>
       </div>
     </DemoPage>
+  );
+}
+
+/** What the toggle mode opens: a small table of its own, not more rows. */
+function SubTable({ node }: { node: Node }) {
+  const children = node.children ?? [];
+
+  return (
+    <div className='px-4 py-3'>
+      <div className='mb-2 font-medium text-slate-700 text-xs'>
+        {node.name} · 하위 {children.length}건 · 합계 {num(node.amount)} tCO₂eq
+      </div>
+      {children.length === 0 ? (
+        <div className='text-slate-400 text-xs'>하위 항목이 없습니다.</div>
+      ) : (
+        <table className='w-full max-w-xl text-xs'>
+          <thead className='text-slate-400'>
+            <tr>
+              <th className='py-1 text-left font-medium'>항목</th>
+              <th className='py-1 text-right font-medium'>tCO₂eq</th>
+              <th className='py-1 text-right font-medium'>비중</th>
+            </tr>
+          </thead>
+          <tbody className='text-slate-700'>
+            {children.map((child) => (
+              <tr key={child.id} className='border-slate-200 border-t'>
+                <td className='py-1'>{child.name}</td>
+                <td className='py-1 text-right tabular-nums'>{num(child.amount)}</td>
+                <td className='py-1 text-right tabular-nums text-slate-400'>
+                  {node.amount > 0 ? `${Math.round((child.amount / node.amount) * 100)}%` : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 }
 
@@ -183,6 +292,7 @@ export function Resizing() {
         <>
           <Code>enableResizing: false</Code>로 특정 컬럼을 제외합니다.
         </>,
+        '컬럼 순서 변경과 같이 켜도 됩니다. 손잡이 위에서는 헤더 드래그가 꺼지므로, 가장자리를 끌면 폭이 바뀌고 그 밖을 끌면 순서가 바뀝니다.',
       ]}
       api={[
         ['enableColumnResizing', 'boolean', '리사이즈를 켭니다.'],
