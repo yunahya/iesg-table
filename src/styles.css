@@ -33,9 +33,9 @@
        Per-type vertical padding keeps every row the same height regardless of
        whether the cell holds text, a tag, a button or a switch. */
     --tbl-cell-px: 14px;
-    --tbl-cell-px-checkbox: 16px;
+    --tbl-cell-px-wide: 16px;
     --tbl-cell-py: 9px; /* text, number, unit, memo */
-    --tbl-cell-py-checkbox: 11px;
+    /* Checkbox cells have no padding at all — see cellTypeStyles. */
     --tbl-cell-py-loose: 8px; /* tag, icon */
     --tbl-cell-py-compact: 5px; /* button, icon+text */
     --tbl-cell-py-switch: 13px;
@@ -44,6 +44,8 @@
     --tbl-header-bg: #f2f4f6;
     --tbl-header-fg: #5c5f66;
     --tbl-header-fg-hover: #242424;
+    /* Tints the arrow matching the active sort direction. */
+    --tbl-sort-active: #1ad98a;
 
     /* ---------- cell, resting ---------- */
     --tbl-cell-bg: #ffffff;
@@ -73,10 +75,43 @@
     --tbl-tone-danger-bg: #fff1e9;
     --tbl-tone-danger-fg: #242424;
 
+    /* ---------- sticky header & pinned columns ---------- */
+    /* Sticky header cells need an opaque background or rows show through them.
+       Pinned body cells keep their own state colour, so they get no override. */
+    --tbl-sticky-header-bg: var(--tbl-header-bg);
+    --tbl-pinned-shadow: 2px 0 4px -2px rgb(0 0 0 / 0.15);
+    --tbl-pinned-shadow-right: -2px 0 4px -2px rgb(0 0 0 / 0.15);
+
+    /* ---------- column resizing ---------- */
+    --tbl-resize-handle-width: 5px;
+    --tbl-resize-handle: transparent;
+    --tbl-resize-handle-hover: var(--tbl-border);
+    --tbl-resize-handle-active: var(--tbl-sort-active);
+
+    /* ---------- row expansion ---------- */
+    --tbl-expander-fg: var(--tbl-cell-fg);
+    --tbl-subrow-bg: var(--tbl-tone-muted-bg);
+
+    /* ---------- inline editing ---------- */
+    --tbl-edit-bg: var(--tbl-cell-bg);
+    --tbl-edit-fg: var(--tbl-cell-fg);
+    --tbl-edit-border: var(--tbl-sort-active);
+    --tbl-edit-hover-bg: var(--tbl-row-hover-bg);
+
     /* ---------- misc ---------- */
     --tbl-empty-fg: #a2a6a9;
     --tbl-required-fg: #ff5630;
-    --tbl-checkbox-accent: #1ad98a;
+
+    /* ---------- checkbox ---------- */
+    /* Size is deliberately NOT a token: the checkbox is fixed at 18x18. */
+    --tbl-checkbox-radius: 1.5px;
+    --tbl-checkbox-bg: #ffffff;
     --tbl-checkbox-border: #a7adb2;
+    --tbl-checkbox-checked-bg: #303140;
+    --tbl-checkbox-checked-border: #303140;
+    /* The tick and the indeterminate dash. */
+    --tbl-checkbox-mark: #ffffff;
+    --tbl-checkbox-disabled-bg: #f2f4f6;
+    --tbl-checkbox-disabled-border: #d8dbdd;
   }
 }

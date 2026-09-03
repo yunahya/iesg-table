@@ -10,7 +10,8 @@ It ships with the i-ESG design system as its default look. Override any token to
 pnpm add @iesg/table @tanstack/react-table
 ```
 
-Requires React 18 or 19 and Tailwind CSS v4.
+Requires React 18 or 19 and Tailwind CSS v4. `@tanstack/react-virtual` is bundled as a dependency and
+only does work when you turn virtualisation on.
 
 ## Setup
 
@@ -221,12 +222,99 @@ pnpm check-types
 pnpm build
 ```
 
+## Filtering and column visibility
+
+```tsx
+<DataTable
+  {...props}
+  globalFilter={query}
+  onGlobalFilterChange={setQuery}
+  columnVisibility={{ note: false }}
+  onColumnVisibilityChange={setVisibility}
+/>
+```
+
+Hidden columns drop out of the `<colgroup>` too, so the remaining widths stay correct. Pass
+`manualFiltering` when the server does the filtering.
+
+## Row expansion
+
+Two shapes. A tree of real rows:
+
+```tsx
+import { createExpanderColumn } from '@iesg/table';
+
+const columns = [createExpanderColumn<Node>(), ...rest];
+
+<DataTable
+  {...props}
+  getSubRows={(row) => row.children}
+  expanded={expanded}
+  onExpandedChange={setExpanded}
+/>
+```
+
+Or a full-width panel under the row:
+
+```tsx
+<DataTable {...props} renderSubRow={(row) => <Detail row={row.original} />} />
+```
+
+Sub-rows are ordinary rows, so sorting, filtering and selection apply to them and `row.depth` drives
+the indent. `renderSubRow` cannot be combined with virtualisation — a panel breaks the fixed
+row-to-index mapping.
+
+## Resizing, sticky header, pinned columns
+
+```tsx
+<DataTable
+  {...props}
+  enableColumnResizing
+  columnSizing={sizing}
+  onColumnSizingChange={setSizing}
+  columnPinning={{ left: ['select', 'category'], right: [] }}
+  stickyHeader
+  maxHeight={400}
+/>
+```
+
+`meta.width` feeds TanStack's column sizing, so resizing, pinning offsets and the `<col>` elements
+all read from one number. Pinned columns get their `left`/`right` offsets computed for you plus a
+divider shadow at the boundary.
+
+The table uses `border-separate`, not `border-collapse` — collapsed borders are painted by the table
+and vanish from sticky cells. Each cell draws only its own bottom and right edge, so nothing doubles
+up.
+
+## Virtualisation
+
+```tsx
+<DataTable {...props} maxHeight={400} virtual={{ estimateRowHeight: 40, overscan: 10 }} />
+```
+
+Only the visible rows reach the DOM; spacer rows keep the scrollbar honest. Needs `maxHeight`. Works
+alongside sorting, filtering and sub-rows.
+
+## Inline editing
+
+```tsx
+import { EditableCell } from '@iesg/table';
+
+const columns = [
+  { accessorKey: 'amount', header: 'tCO₂eq', meta: { numeric: true },
+    cell: (ctx) => <EditableCell ctx={ctx} inputType='number' /> },
+];
+
+<DataTable {...props} onCellEdit={({ rowId, columnId, value }) => save(rowId, columnId, value)} />
+```
+
+Click, Enter or F2 starts editing. Enter and blur commit; Escape reverts. A `number` input that does
+not parse reverts rather than committing `NaN`.
+
 ## Roadmap
 
-Not in 0.1: column resizing, sticky header and pinned columns, virtualization
-(`@tanstack/react-virtual`), row expansion and sub-rows, column visibility toggles, filtering, and
-inline cell editing. All are reachable through TanStack's row models and feature API without forking
-anything.
+Not in 0.1: row drag reordering, column reordering, grouping and aggregation, and CSV/Excel export.
+All are reachable through TanStack's row models and feature API without forking anything.
 
 ## License
 

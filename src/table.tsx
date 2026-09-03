@@ -4,6 +4,7 @@ import type {
   KeyboardEvent,
   PropsWithChildren,
   ReactNode,
+  Ref,
   TableHTMLAttributes,
   TdHTMLAttributes,
   ThHTMLAttributes,
@@ -52,7 +53,7 @@ const BORDER_B = 'border-b-[length:var(--tbl-border-width)] border-b-[var(--tbl-
 const BORDER_R = 'border-r-[length:var(--tbl-border-width)] border-r-[var(--tbl-border)]';
 
 const headerTypeStyles: Record<HeaderType, string> = {
-  checkbox: 'px-[var(--tbl-cell-px-checkbox)] py-0',
+  checkbox: 'p-0',
   sort: 'px-[var(--tbl-cell-px)] py-0',
   text: 'px-[var(--tbl-cell-px)] py-0',
   number: 'px-[var(--tbl-cell-px)] py-0 text-right',
@@ -61,7 +62,7 @@ const headerTypeStyles: Record<HeaderType, string> = {
 };
 
 const cellTypeStyles: Record<CellType, string> = {
-  checkbox: 'px-[var(--tbl-cell-px-checkbox)] py-[var(--tbl-cell-py-checkbox)]',
+  checkbox: 'p-0',
   text: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py)]',
   number: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py)] text-right',
   unit: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py)]',
@@ -73,7 +74,7 @@ const cellTypeStyles: Record<CellType, string> = {
   button: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py-compact)]',
   'icon-text': 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py-compact)]',
   icon: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py-loose)]',
-  switch: 'px-[var(--tbl-cell-px-checkbox)] py-[var(--tbl-cell-py-switch)]',
+  switch: 'px-[var(--tbl-cell-px-wide)] py-[var(--tbl-cell-py-switch)]',
 };
 
 const cellStateStyles: Record<CellState, string> = {
@@ -95,7 +96,7 @@ function stateClassName(state: CellState, tone: CellTone) {
   return state === 'default' ? cn(cellStateStyles[state], cellToneStyles[tone]) : cellStateStyles[state];
 }
 
-function CellContent({ type, children }: { type: CellType; children: ReactNode }) {
+function CellContent({ type, truncate, children }: { type: CellType; truncate: boolean; children: ReactNode }) {
   const rightAligned = type === 'number' || type === 'text-dropdown';
   const centerAligned = type === 'checkbox';
   const compound = type === 'text-tag' || type === 'text-button' || type === 'icon-text';
@@ -107,6 +108,11 @@ function CellContent({ type, children }: { type: CellType; children: ReactNode }
         rightAligned && 'justify-end',
         centerAligned && 'justify-center',
         compound && 'gap-2',
+        // The ellipsis has to live on the element holding the text, not the cell.
+        // Controls are never truncated — that would let them shrink.
+        truncate &&
+          !centerAligned &&
+          'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap [&>*]:min-w-0 [&>*]:truncate',
       )}
     >
       {children}
@@ -123,6 +129,13 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   wrapperClassName?: string;
   /** Style for the sizing box between the scroll container and the table. */
   contentStyle?: CSSProperties;
+  /**
+   * Caps the scroll container's height, turning on vertical scrolling. Required
+   * for a sticky header or virtualisation to have anything to scroll against.
+   */
+  maxHeight?: number | string;
+  /** Ref for the scroll container — virtualisation measures against it. */
+  scrollRef?: Ref<HTMLDivElement>;
 }
 
 /** Scrollable wrapper plus the `<table>` element. */
@@ -130,18 +143,27 @@ export const Table = ({
   className,
   wrapperClassName,
   contentStyle,
+  maxHeight,
+  scrollRef,
   children,
   ...props
 }: PropsWithChildren<TableProps>) => (
   <div
+    ref={scrollRef}
     className={cn(
-      'w-full overflow-x-auto rounded-[var(--tbl-radius)]',
+      'w-full overflow-auto rounded-[var(--tbl-radius)]',
       'border-[length:var(--tbl-border-width)] border-[var(--tbl-border)]',
       wrapperClassName,
     )}
+    style={maxHeight === undefined ? undefined : { maxHeight }}
   >
     <div className='min-w-full' style={contentStyle}>
-      <table className={cn('w-full min-w-max border-collapse text-sm', className)} {...props}>
+      {/*
+        border-separate, not border-collapse: collapsed borders are painted by
+        the table, so they vanish from sticky cells. Every cell draws only its
+        own bottom and right edge, so nothing doubles up.
+      */}
+      <table className={cn('w-full min-w-max border-separate border-spacing-0 text-sm', className)} {...props}>
         {children}
       </table>
     </div>
@@ -316,7 +338,9 @@ export const TableCell = ({
   ...props
 }: PropsWithChildren<TableCellProps>) => (
   <td className={bodyCellClassName({ type, state, tone, line, rightStroke, truncate, className })} {...props}>
-    <CellContent type={type}>{children}</CellContent>
+    <CellContent type={type} truncate={truncate}>
+      {children}
+    </CellContent>
   </td>
 );
 
@@ -342,7 +366,9 @@ export const TableRowHeaderCell = ({
     scope={scope ?? 'row'}
     {...props}
   >
-    <CellContent type={type}>{children}</CellContent>
+    <CellContent type={type} truncate={truncate}>
+      {children}
+    </CellContent>
   </th>
 );
 

@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "../../src/styles.css";
+
+/* Tailwind must scan the library source for the utilities it generates. */
+@source '../../src';

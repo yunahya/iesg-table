@@ -20,12 +20,14 @@
   },
   "scripts": {
     "build": "tsup && cp src/styles.css dist/styles.css",
-    "dev": "tsup --watch",
+    "dev": "vite",
     "check-types": "tsc --noEmit",
     "lint-format": "biome check .",
     "lint-format:fix": "biome check . --write",
     "prepublishOnly": "pnpm run check-types && pnpm run test && pnpm run build",
-    "test": "tsx test/smoke.tsx"
+    "test": "tsx test/smoke.tsx",
+    "build:watch": "tsup --watch",
+    "playground:build": "vite build"
   },
   "peerDependencies": {
     "@tanstack/react-table": "^8.20.0",
@@ -33,20 +35,25 @@
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "dependencies": {
+    "@tanstack/react-virtual": "^3.14.10",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-table": "^8.21.3",
     "@types/node": "^26.4.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^6.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "tailwindcss": "^4.3.3",
     "tsup": "^8.3.5",
     "tsx": "^4.23.13",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vite": "^8.2.2"
   },
   "keywords": [
     "react",
