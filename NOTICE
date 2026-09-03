@@ -1,0 +1,9 @@
+@iesg/table
+
+This package builds on TanStack Table v8 (https://github.com/TanStack/table),
+which is distributed under the MIT License, Copyright (c) 2021-present
+Tanner Linsley. TanStack Table is consumed as an unmodified peer dependency;
+no TanStack source code is vendored into this repository.
+
+"TanStack" is a trademark of its respective owner. This project is not
+affiliated with, endorsed by, or sponsored by TanStack.

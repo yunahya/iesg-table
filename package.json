@@ -1,0 +1,65 @@
+{
+  "name": "@iesg/table",
+  "version": "0.1.0",
+  "description": "Design-system data table for React, built on TanStack Table v8. Fully themeable via CSS variables.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": ["*.css"],
+  "files": ["dist", "README.md", "LICENSE"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup && cp src/styles.css dist/styles.css",
+    "dev": "tsup --watch",
+    "check-types": "tsc --noEmit",
+    "lint-format": "biome check .",
+    "lint-format:fix": "biome check . --write",
+    "prepublishOnly": "pnpm run check-types && pnpm run test && pnpm run build",
+    "test": "tsx test/smoke.tsx"
+  },
+  "peerDependencies": {
+    "@tanstack/react-table": "^8.20.0",
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@tanstack/react-table": "^8.21.3",
+    "@types/node": "^26.4.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.23.13",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "react",
+    "table",
+    "data-table",
+    "datagrid",
+    "tanstack-table",
+    "tailwindcss",
+    "design-system",
+    "themeable"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

@@ -1,0 +1,82 @@
+/**
+ * @iesg/table — theme tokens
+ *
+ * Usage:
+ *   @import "tailwindcss";
+ *   @import "@iesg/table/styles.css";
+ *
+ * Every colour the table renders goes through one of these semantic tokens.
+ * Override any of them to retheme, globally or scoped:
+ *
+ *   :root            { --tbl-row-selected-bg: #e0f2fe; }   // global
+ *   .compact-table   { --tbl-cell-py: 4px; }               // scoped to a subtree
+ *   [data-theme=dark]{ --tbl-cell-bg: #18181b; }           // dark mode
+ *
+ * Defaults below are the i-ESG design system palette. They are plain colour
+ * literals so the package works with no other stylesheet present; if you already
+ * ship a palette, point the tokens at your own variables instead:
+ *
+ *   :root { --tbl-border: var(--color-warm-neutral-40); }
+ *
+ * Declared in `@layer base`, so unlayered author CSS always wins.
+ */
+
+@layer base {
+  :root {
+    /* ---------- structure ---------- */
+    --tbl-border: #e5e5e5;
+    --tbl-border-width: 1px;
+    --tbl-radius: 0px;
+    --tbl-row-height: 40px;
+
+    /* ---------- spacing ----------
+       Per-type vertical padding keeps every row the same height regardless of
+       whether the cell holds text, a tag, a button or a switch. */
+    --tbl-cell-px: 14px;
+    --tbl-cell-px-checkbox: 16px;
+    --tbl-cell-py: 9px; /* text, number, unit, memo */
+    --tbl-cell-py-checkbox: 11px;
+    --tbl-cell-py-loose: 8px; /* tag, icon */
+    --tbl-cell-py-compact: 5px; /* button, icon+text */
+    --tbl-cell-py-switch: 13px;
+
+    /* ---------- header ---------- */
+    --tbl-header-bg: #f2f4f6;
+    --tbl-header-fg: #5c5f66;
+    --tbl-header-fg-hover: #242424;
+
+    /* ---------- cell, resting ---------- */
+    --tbl-cell-bg: #ffffff;
+    --tbl-cell-fg: #242424;
+
+    /* ---------- row states ---------- */
+    --tbl-row-hover-bg: #fafafa;
+    --tbl-row-clickable-hover-bg: #fafbfd;
+    --tbl-cell-hover-bg: #def6e5;
+    --tbl-row-selected-bg: #def6e5;
+    --tbl-row-selected-fg: #242424;
+    --tbl-row-disabled-bg: #f2f4f6;
+    --tbl-row-disabled-fg: #a7adb2;
+    --tbl-focus-ring: #1ad98a;
+
+    /* ---------- cell state: disabled / not applied ---------- */
+    --tbl-cell-disabled-bg: #fafafa;
+    --tbl-cell-disabled-fg: #7a8087;
+
+    /* ---------- cell tones ---------- */
+    --tbl-tone-muted-bg: #fafafa;
+    --tbl-tone-muted-fg: #7a8087;
+    --tbl-tone-info-bg: #ebf3ff;
+    --tbl-tone-info-fg: #7a8087;
+    --tbl-tone-warning-bg: #fffbd5;
+    --tbl-tone-warning-fg: #242424;
+    --tbl-tone-danger-bg: #fff1e9;
+    --tbl-tone-danger-fg: #242424;
+
+    /* ---------- misc ---------- */
+    --tbl-empty-fg: #a2a6a9;
+    --tbl-required-fg: #ff5630;
+    --tbl-checkbox-accent: #1ad98a;
+    --tbl-checkbox-border: #a7adb2;
+  }
+}
