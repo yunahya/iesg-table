@@ -329,7 +329,7 @@ export function CellTypes() {
         <>
           패딩 값 자체는 <Code>--tbl-cell-px</Code> 계열 변수입니다. 밀도를 바꾸려면 여기만 건드리면 됩니다.
         </>,
-        '내용은 전적으로 여러분 몫입니다 — 라이브러리는 배치만 하고 태그·버튼·스위치는 직접 렌더링합니다.',
+        '내용은 전적으로 사용자의 몫입니다 — 라이브러리는 배치만 하고 태그·버튼·스위치는 직접 렌더링합니다.',
       ]}
       api={[
         ['meta.type', 'CellType', '13가지 중 하나.'],
@@ -480,7 +480,7 @@ export function StatusStates() {
           글자색은 <Code>--tbl-empty-fg</Code>입니다.
         </>,
         <>
-          스켈레톤을 쓰고 싶다면 <Code>loading</Code> 대신 여러분 쪽에서 더미 데이터를 넣어 렌더링하면 됩니다.
+          스켈레톤을 쓰고 싶다면 <Code>loading</Code> 대신 사용자 쪽에서 더미 데이터를 넣어 렌더링하면 됩니다.
         </>,
       ]}
       tokens={['--tbl-empty-fg']}

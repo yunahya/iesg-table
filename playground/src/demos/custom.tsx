@@ -74,7 +74,7 @@ export function InlineEditing() {
           기본 순서를, <Code>←→</Code>는 캐럿 이동만 하게 됩니다.
         </>,
         <>
-          여러분이 만든 셀 컴포넌트도 <Code>CELL_NAV_ATTR</Code>을 펼쳐 넣으면 같은 이동 대상에 포함됩니다.
+          사용자가 만든 셀 컴포넌트도 <Code>CELL_NAV_ATTR</Code>을 펼쳐 넣으면 같은 이동 대상에 포함됩니다.
         </>,
         <>
           <Code>validate</Code>로 확정 전에 값을 거를 수 있고, 통과하지 못하면 원래 값으로 되돌아갑니다.
@@ -97,8 +97,8 @@ export function InlineEditing() {
       tokens={['--tbl-edit-bg', '--tbl-edit-fg', '--tbl-edit-border', '--tbl-edit-hover-bg']}
       caveats={[
         <>
-          상태는 여러분이 들고 있습니다 — <Code>onCellEdit</Code>에서 데이터를 갱신하지 않으면 값은 되돌아갑니다. 낙관적
-          업데이트도, 서버 확인 후 반영도 모두 여러분 선택입니다.
+          상태는 사용자가 들고 있습니다 — <Code>onCellEdit</Code>에서 데이터를 갱신하지 않으면 값은 되돌아갑니다. 낙관적
+          업데이트도, 서버 확인 후 반영도 모두 사용자의 선택입니다.
         </>,
       ]}
     >
@@ -182,7 +182,7 @@ export function ComponentSlots() {
   return (
     <DemoPage
       title='컴포넌트 교체'
-      summary='체크박스와 정렬 아이콘은 슬롯입니다. 여러분의 디자인 시스템 컴포넌트를 그대로 꽂으면 됩니다 — 아래는 토글 스위치와 글자 표시기로 바꾼 같은 테이블입니다.'
+      summary='체크박스와 정렬 아이콘은 슬롯입니다. 사용자의 디자인 시스템 컴포넌트를 그대로 꽂으면 됩니다 — 아래는 토글 스위치와 글자 표시기로 바꾼 같은 테이블입니다.'
       customization={[
         <>
           <Code>components.Checkbox</Code>는 <Code>{'{ checked, onChange, label, disabled }'}</Code>를 받습니다.{' '}

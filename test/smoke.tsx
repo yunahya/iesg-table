@@ -20,6 +20,7 @@ import {
   tableToCsv,
   usePersistedState,
 } from '../src/index';
+import { shallowEqual } from '../src/lib/shallow-equal';
 
 type Row = { id: string; name: string; amount: number };
 
@@ -648,5 +649,25 @@ check('key to direction', '', [
     ['an empty store falls back', renderToStaticMarkup(<Probe storage={makeStorage({})} />).includes('fallback')],
   ]);
 }
+
+// 26. controlled props keep their identity when nothing really changed.
+// This is what stops `grouping={[]}` written inline from resetting the
+// expanded state on every render: TanStack compares its row-model
+// dependencies by identity, and the grouped model resets expansion whenever
+// it recomputes.
+check('shallow identity guard', '', [
+  ['two empty arrays match', shallowEqual([], [])],
+  ['two empty objects match', shallowEqual({}, {})],
+  ['same members match', shallowEqual(['scope'], ['scope'])],
+  ['nested empties match', shallowEqual({ left: [], right: [] }, { left: [], right: [] })],
+  ['nested differences are caught', !shallowEqual({ left: ['a'], right: [] }, { left: [], right: [] })],
+  ['a filter list matches by value', shallowEqual([{ id: 'scope', value: '1' }], [{ id: 'scope', value: '1' }])],
+  ['the depth cap stops at three levels', !shallowEqual([[['x']]], [[['x']]])],
+  ['different members differ', !shallowEqual(['scope'], ['facility'])],
+  ['different lengths differ', !shallowEqual(['a'], ['a', 'b'])],
+  ['an array is not an object', !shallowEqual([], {})],
+  ['null is handled', !shallowEqual(null, {}) && shallowEqual(null, null)],
+  ['primitives compare by value', shallowEqual('a', 'a') && !shallowEqual('a', 'b')],
+]);
 
 console.log('\nAll feature tests passed.');

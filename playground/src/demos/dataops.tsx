@@ -50,7 +50,7 @@ export function Filtering() {
         </>
       }
       customization={[
-        '검색창 UI는 라이브러리가 그리지 않습니다 — 값만 넘기면 됩니다. 디자인은 전부 여러분 것입니다.',
+        '검색창 UI는 라이브러리가 그리지 않습니다 — 값만 넘기면 됩니다. 디자인은 전부 사용자 것입니다.',
         <>
           비교 방식은 컬럼의 <Code>filterFn</Code>으로 바꿉니다 (<Code>includesString</Code>, <Code>equalsString</Code>,
           직접 작성 등).
@@ -279,7 +279,7 @@ export function ColumnReorder() {
         '고정(pinned)된 컬럼도 자동으로 제외됩니다.',
         <>
           저장은 <Code>usePersistedState</Code> 훅으로 합니다. 컬럼 폭·표시 여부·정렬 등 다른 제어 상태에도 똑같이
-          씁니다. 테이블이 스스로 저장소에 쓰지는 않습니다 — 키 이름과 저장 여부는 여러분이 정합니다.
+          씁니다. 테이블이 스스로 저장소에 쓰지는 않습니다 — 키 이름과 저장 여부는 사용자가 정합니다.
         </>,
         <>
           표시선 색은 행 드래그와 같은 <Code>--tbl-drop-indicator</Code>를 씁니다.

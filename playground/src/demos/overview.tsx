@@ -7,6 +7,7 @@ import {
   DataTable,
   EditableCell,
   type ExpandedState,
+  type GroupingState,
   type SortingState,
   type TableColumnDef,
   type TableInstance,
@@ -118,6 +119,14 @@ const CONFLICTS: Partial<Record<FeatureKey, { with: FeatureKey; why: string }>> 
   virtual: { with: 'pagination', why: '페이지로 잘라 놓고 가상화할 이유가 없습니다' },
   pagination: { with: 'virtual', why: '가상화가 이미 렌더링 양을 제한합니다' },
 };
+
+// Stable empty values. Inline literals would be a new object every render,
+// which the table now tolerates — but handing it stable references is still
+// the cheaper thing to do.
+const NO_GROUPING: GroupingState = [];
+const NO_PINNING: ColumnPinningState = { left: [], right: [] };
+const NO_VISIBILITY: VisibilityState = {};
+const GROUP_BY_SCOPE: GroupingState = ['scope'];
 
 /* ------------------------------------------------------------------ */
 /* Overview                                                             */
@@ -332,14 +341,14 @@ export function Overview() {
             setQuery((prev) => (typeof updater === 'function' ? (updater(prev) as string) : (updater as string)))
           }
           /* visibility */
-          columnVisibility={features.visibility ? visibility : {}}
+          columnVisibility={features.visibility ? visibility : NO_VISIBILITY}
           onColumnVisibilityChange={setVisibility}
           /* expansion */
           getSubRows={features.expansion && !features.grouping ? (row) => row.children : undefined}
           expanded={expanded}
           onExpandedChange={setExpanded}
           /* grouping */
-          grouping={features.grouping ? ['scope'] : []}
+          grouping={features.grouping ? GROUP_BY_SCOPE : NO_GROUPING}
           /* resizing */
           enableColumnResizing={features.resizing}
           columnSizing={sizing}
@@ -349,7 +358,7 @@ export function Overview() {
           columnOrder={columnOrder}
           onColumnOrderChange={setColumnOrder}
           /* pinning */
-          columnPinning={features.pinning ? pinning : { left: [], right: [] }}
+          columnPinning={features.pinning ? pinning : NO_PINNING}
           onColumnPinningChange={setPinning}
           /* row drag */
           enableRowDragging={features.drag}
