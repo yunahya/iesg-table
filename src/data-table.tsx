@@ -822,11 +822,23 @@ export function DataTable<TData>({
     </Table>
   );
 
+  /*
+   * `maxHeight` is normally a percentage — "fill whatever height the parent
+   * gives me". A percentage resolves against the containing block, and an
+   * `auto`-height containing block turns `max-height: 100%` into `none`: the
+   * table then grows past its parent instead of scrolling inside it. So every
+   * wrapper between the caller's sized element and the scroll container has to
+   * carry a height of its own once the caller caps the height. Without
+   * `maxHeight` there is nothing to resolve and the wrappers stay
+   * content-sized, so a table in normal document flow is unaffected.
+   */
+  const capped = maxHeight !== undefined;
+
   // The overlay is positioned against this wrapper rather than the scroll
   // container, so it stays centred on the table instead of scrolling away.
   // It is always present so that toggling `loading` does not remount the table.
   const framed = (
-    <div className='relative'>
+    <div className={cn('relative', capped && (pagination ? 'min-h-0 flex-1' : 'h-full'))}>
       {renderTable}
       {loading && <LoadingOverlay label={labels.loading} />}
     </div>
@@ -835,7 +847,7 @@ export function DataTable<TData>({
   if (!pagination) return framed;
 
   return (
-    <div className='flex flex-col gap-2'>
+    <div className={cn('flex flex-col gap-2', capped && 'h-full min-h-0')}>
       {framed}
       <TablePagination {...pagination} />
     </div>
