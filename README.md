@@ -189,6 +189,11 @@ Two things to know:
 
 ## Server-side data
 
+`manualSorting` and `manualFiltering` do not mean "the server does it". They mean **the table does
+not**: `data` is already in the order and the shape it should be shown in. The headers still report
+what the user asked for through `sorting` / `columnFilters`, and acting on it is yours — usually a
+server query, but a worker or a parent component sorting the array is the same thing.
+
 ```tsx
 <DataTable
   data={page.items}
@@ -284,7 +289,8 @@ reference page.
 ```
 
 Hidden columns drop out of the `<colgroup>` too, so the remaining widths stay correct. Pass
-`manualFiltering` when the server does the filtering.
+`manualFiltering` when the rows arrive already filtered — the filter values still reach you, the
+table just stops applying them itself.
 
 ## Row expansion
 

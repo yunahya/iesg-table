@@ -38,7 +38,9 @@ export function Sorting() {
           컬럼별로 <Code>enableSorting: false</Code>로 끌 수 있습니다. 아래 표의 &lsquo;상태&rsquo; 컬럼이 그렇습니다.
         </>,
         <>
-          서버 정렬은 <Code>manualSorting</Code>을 켜면 됩니다 — 헤더는 의도만 알리고 재정렬은 하지 않습니다.
+          <Code>manualSorting</Code>은 &lsquo;서버가 정렬한다&rsquo;가 아니라{' '}
+          <strong>&lsquo;테이블이 정렬하지 않는다&rsquo;</strong>는 뜻입니다. <Code>data</Code>가 이미 보여줄 순서로
+          들어온다는 선언이고, 실제로 누가 정렬하는지는 상관하지 않습니다 — 서버든, 워커든, 부모 컴포넌트든.
         </>,
         <>
           정렬 아이콘 자체는 <Code>components={'{{ SortIcon }}'}</Code>로 교체합니다.
@@ -49,14 +51,14 @@ export function Sorting() {
       ]}
       api={[
         ['sorting / onSortingChange', 'SortingState', '제어 상태. 넘기지 않으면 내부에서 관리합니다.'],
-        ['manualSorting', 'boolean', '클라이언트 정렬을 건너뜁니다.'],
+        ['manualSorting', 'boolean', '테이블이 정렬하지 않습니다. data가 이미 정렬되어 있다는 뜻.'],
         ['enableSorting', 'boolean', '테이블 전체를 끕니다. 컬럼 단위로도 지정 가능합니다.'],
       ]}
       tokens={['--tbl-sort-active', '--tbl-header-fg', '--tbl-header-fg-hover']}
     >
       <div className='space-y-3'>
         <button type='button' className={manual ? btnOn : btn} onClick={() => setManual((v) => !v)}>
-          manualSorting {manual ? '켜짐 (서버 정렬 가정)' : '꺼짐'}
+          manualSorting {manual ? '켜짐' : '꺼짐'}
         </button>
         <DataTable
           data={emissions}
@@ -69,7 +71,8 @@ export function Sorting() {
         />
         <Note>
           현재 정렬 상태: <Code>{JSON.stringify(sorting)}</Code>
-          {manual && ' — manualSorting이 켜져 있어 화면 순서는 바뀌지 않습니다.'}
+          {manual &&
+            ' — 헤더는 요청한 정렬을 그대로 알려주지만, 이 데이터는 정렬해서 넘긴 게 아니라 화면 순서는 그대로입니다.'}
         </Note>
       </div>
     </DemoPage>
@@ -190,7 +193,7 @@ export function Pagination() {
       api={[
         ['pagination.page / pageSize / totalCount', 'number', '서버가 알려주는 값 그대로.'],
         ['onPageChange / onPageSizeChange', '(n) => void', '페이지 이동.'],
-        ['manualSorting', 'boolean', '정렬도 서버에서 하겠다는 선언.'],
+        ['manualSorting', 'boolean', '정렬된 data를 받는다는 선언. 정렬은 서버 쿼리에 맡깁니다.'],
         ["selectAllMode: 'all'", '-', '헤더 체크박스가 전체 95행을 선택합니다.'],
       ]}
     >

@@ -28,7 +28,7 @@ export const GROUPS: Group[] = [
   {
     title: '기본',
     entries: [
-      { id: 'sorting', label: '정렬', hint: '클라이언트 · 서버 정렬', Component: Sorting },
+      { id: 'sorting', label: '정렬', hint: '테이블이 정렬 · 정렬된 data 받기', Component: Sorting },
       { id: 'selection', label: '행 선택', hint: '체크박스, 전체선택', Component: Selection },
       { id: 'pagination', label: '페이지네이션', hint: '서버 연동, 페이지 간 선택 유지', Component: Pagination },
       { id: 'cell-types', label: '셀 타입', hint: '13종 + custom, 행 높이는 그대로', Component: CellTypes },

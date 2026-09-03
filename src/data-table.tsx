@@ -126,7 +126,12 @@ export interface DataTableProps<TData> {
   /* sorting */
   sorting?: SortingState;
   onSortingChange?: OnChangeFn<SortingState>;
-  /** Skip client-side sorting; you sort on the server. */
+  /**
+   * Do not sort the rows — `data` arrives in the order it should be shown.
+   * The headers still report the sort the user asked for through `sorting`;
+   * acting on it is yours. Usually that means a server query, but a worker or
+   * a parent component sorting the array is the same thing.
+   */
   manualSorting?: boolean;
   enableSorting?: boolean;
 
@@ -135,7 +140,11 @@ export interface DataTableProps<TData> {
   onGlobalFilterChange?: OnChangeFn<string>;
   columnFilters?: ColumnFiltersState;
   onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
-  /** Skip client-side filtering; you filter on the server. */
+  /**
+   * Do not filter the rows — `data` arrives already filtered. `globalFilter`
+   * and `columnFilters` still carry what the user typed, so you can act on it
+   * wherever the filtering actually happens.
+   */
   manualFiltering?: boolean;
 
   /* column visibility */

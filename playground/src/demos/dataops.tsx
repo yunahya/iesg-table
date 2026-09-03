@@ -45,8 +45,9 @@ export function Filtering() {
       title='검색 · 필터'
       summary={
         <>
-          모든 컬럼을 훑는 <Code>globalFilter</Code>와 컬럼 단위 <Code>columnFilters</Code> 두 가지가 있습니다. 서버
-          필터링이면 <Code>manualFiltering</Code>을 켜고 결과만 넘기세요.
+          모든 컬럼을 훑는 <Code>globalFilter</Code>와 컬럼 단위 <Code>columnFilters</Code> 두 가지가 있습니다. 이미
+          걸러진 데이터를 받는다면 <Code>manualFiltering</Code>을 켜세요 — 입력값은 그대로 전달되고, 테이블만 거르는
+          일을 멈춥니다.
         </>
       }
       customization={[
@@ -62,7 +63,7 @@ export function Filtering() {
       api={[
         ['globalFilter / onGlobalFilterChange', 'string', '전체 컬럼 대상 검색어.'],
         ['columnFilters / onColumnFiltersChange', 'ColumnFiltersState', '컬럼별 필터 값 배열.'],
-        ['manualFiltering', 'boolean', '클라이언트 필터링을 건너뜁니다.'],
+        ['manualFiltering', 'boolean', '테이블이 거르지 않습니다. data가 이미 필터링되어 있다는 뜻.'],
       ]}
     >
       <div className='space-y-3'>

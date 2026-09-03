@@ -93,7 +93,7 @@ function Origin({ kind }: { kind: 'tanstack' | 'own' | 'mixed' }) {
 const FEATURES: ReactNode[][] = [
   [
     '정렬',
-    '클라이언트 정렬, 서버 정렬(manualSorting), 제어/비제어 모두',
+    '클라이언트 정렬, 정렬된 data 받기(manualSorting), 제어/비제어 모두',
     <Code key='k'>sorting</Code>,
     <span key='o'>
       <Origin kind='mixed' />
@@ -219,7 +219,7 @@ const FEATURES: ReactNode[][] = [
   ],
   [
     '전역 검색 / 컬럼 필터',
-    '클라이언트 필터, 서버 필터(manualFiltering)',
+    '클라이언트 필터, 필터링된 data 받기(manualFiltering)',
     <Code key='k'>globalFilter</Code>,
     <span key='o'>
       <Origin kind='tanstack' />
