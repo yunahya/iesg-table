@@ -14,7 +14,7 @@ import {
 } from '../../../src/index';
 import { baseColumns } from '../columns';
 import { type Emission, emissions, labels, paginationLabels } from '../data';
-import { Code, DemoPage, Note, Tag, btn, btnOn } from '../ui';
+import { Code, DemoPage, Note, Tag, btn } from '../ui';
 
 /* ------------------------------------------------------------------ */
 /* 정렬                                                                 */
@@ -22,7 +22,6 @@ import { Code, DemoPage, Note, Tag, btn, btnOn } from '../ui';
 
 export function Sorting() {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'amount', desc: true }]);
-  const [manual, setManual] = useState(false);
 
   return (
     <DemoPage
@@ -30,36 +29,34 @@ export function Sorting() {
       summary={
         <>
           헤더를 클릭하면 오름차순 → 내림차순 → 해제 순으로 돕니다. 활성 방향의 화살표만 <Code>--tbl-sort-active</Code>{' '}
-          색으로 칠해집니다.
+          색으로 칠해집니다. Shift를 누른 채 클릭하면 여러 컬럼으로 정렬됩니다.
         </>
       }
       customization={[
         <>
-          컬럼별로 <Code>enableSorting: false</Code>로 끌 수 있습니다. 아래 표의 &lsquo;상태&rsquo; 컬럼이 그렇습니다.
+          컬럼별로 <Code>enableSorting: false</Code>로 끌 수 있습니다. 아래 표의 &lsquo;상태&rsquo;·&lsquo;비고&rsquo;
+          컬럼이 그렇습니다.
         </>,
         <>
-          <Code>manualSorting</Code>은 &lsquo;서버가 정렬한다&rsquo;가 아니라{' '}
-          <strong>&lsquo;테이블이 정렬하지 않는다&rsquo;</strong>는 뜻입니다. <Code>data</Code>가 이미 보여줄 순서로
-          들어온다는 선언이고, 실제로 누가 정렬하는지는 상관하지 않습니다 — 서버든, 워커든, 부모 컴포넌트든.
+          비교 함수는 컬럼의 <Code>sortingFn</Code>으로 바꿉니다 — TanStack 기본(<Code>alphanumeric</Code>,{' '}
+          <Code>datetime</Code>, <Code>basic</Code> 등) 또는 직접 작성.
         </>,
         <>
-          정렬 아이콘 자체는 <Code>components={'{{ SortIcon }}'}</Code>로 교체합니다.
+          정렬 아이콘은 <Code>components={'{{ SortIcon }}'}</Code>로 교체합니다. 방향은{' '}
+          <Code>{"'asc' | 'desc' | false"}</Code>로 넘어옵니다.
         </>,
         <>
-          비교 함수는 컬럼의 <Code>sortingFn</Code>으로 바꿉니다 (TanStack 기본 제공 + 직접 작성).
+          <Code>sorting</Code>을 넘기지 않으면 내부에서 알아서 관리합니다. 상태를 저장하고 싶을 때만 제어하세요.
         </>,
       ]}
       api={[
         ['sorting / onSortingChange', 'SortingState', '제어 상태. 넘기지 않으면 내부에서 관리합니다.'],
-        ['manualSorting', 'boolean', '테이블이 정렬하지 않습니다. data가 이미 정렬되어 있다는 뜻.'],
         ['enableSorting', 'boolean', '테이블 전체를 끕니다. 컬럼 단위로도 지정 가능합니다.'],
+        ['sortingFn', "'alphanumeric' | … | fn", '컬럼별 비교 함수.'],
       ]}
       tokens={['--tbl-sort-active', '--tbl-header-fg', '--tbl-header-fg-hover']}
     >
       <div className='space-y-3'>
-        <button type='button' className={manual ? btnOn : btn} onClick={() => setManual((v) => !v)}>
-          manualSorting {manual ? '켜짐' : '꺼짐'}
-        </button>
         <DataTable
           data={emissions}
           columns={baseColumns}
@@ -67,12 +64,10 @@ export function Sorting() {
           labels={labels}
           sorting={sorting}
           onSortingChange={setSorting}
-          manualSorting={manual}
         />
         <Note>
-          현재 정렬 상태: <Code>{JSON.stringify(sorting)}</Code>
-          {manual &&
-            ' — 헤더는 요청한 정렬을 그대로 알려주지만, 이 데이터는 정렬해서 넘긴 게 아니라 화면 순서는 그대로입니다.'}
+          현재 정렬 상태: <Code>{JSON.stringify(sorting)}</Code> — 헤더는 실제 <Code>button</Code>이라 Tab으로 이동해
+          Enter로도 정렬됩니다.
         </Note>
       </div>
     </DemoPage>
