@@ -146,12 +146,21 @@ const FEATURES: ReactNode[][] = [
     </span>,
   ],
   [
-    '셀 타입 13종',
-    'text, number, unit, memo, checkbox, tag, text-tag, text-dropdown, text-button, button, icon, icon-text, switch',
+    '셀 타입 14종',
+    'text, number, unit, memo, checkbox, tag, text-tag, text-dropdown, text-button, button, icon, icon-text, switch, custom',
     <Code key='k'>meta.type</Code>,
     <span key='o'>
       <Origin kind='own' />
       타입별 패딩·정렬 클래스 매핑. TanStack은 렌더링에 관여하지 않습니다
+    </span>,
+  ],
+  [
+    '커스텀 셀',
+    '13종으로 설명 안 되는 셀. 날짜 선택기·슬라이더 등 아무 컴포넌트나',
+    <Code key='k'>type: 'custom'</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      레이아웃 간섭을 끄는 타입입니다. <Code>meta.className</Code>으로 <Code>td</Code>까지 손댈 수 있습니다
     </span>,
   ],
   [
@@ -579,7 +588,7 @@ export function Reference() {
             ['required', <Code key='k'>boolean</Code>, '헤더 앞에 * 표시'],
             ['truncate', <Code key='k'>boolean</Code>, '말줄임. 기본 true'],
             ['rowHeader', <Code key='k'>boolean</Code>, <span key='v'>{'<th scope="row">'}로 렌더링</span>],
-            ['type', <Code key='k'>CellType</Code>, '패딩과 내부 정렬 (13종)'],
+            ['type', <Code key='k'>CellType</Code>, '패딩과 내부 정렬 (13종 + custom)'],
             ['tone', <Code key='k'>CellTone</Code>, 'none · muted · info · warning · danger'],
             ['state', <Code key='k'>CellState</Code>, 'default · selected · disabled (보통 자동)'],
             ['line / rightStroke', <Code key='k'>boolean</Code>, '아래·오른쪽 테두리. 기본 true'],

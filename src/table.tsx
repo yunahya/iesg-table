@@ -12,7 +12,7 @@ import type {
 import { cn } from './lib/utils';
 
 /** What kind of content a header cell holds. Drives padding and alignment. */
-export type HeaderType = 'text' | 'number' | 'unit' | 'memo' | 'checkbox' | 'sort';
+export type HeaderType = 'text' | 'number' | 'unit' | 'memo' | 'checkbox' | 'sort' | 'custom';
 
 /** What kind of content a body cell holds. Drives padding, alignment and inner layout. */
 export type CellType =
@@ -28,7 +28,13 @@ export type CellType =
   | 'button'
   | 'icon'
   | 'icon-text'
-  | 'switch';
+  | 'switch'
+  /**
+   * Anything the other types do not describe — a date picker, a slider, your
+   * own component. The cell keeps the shared row height and borders and stops
+   * imposing layout: no ellipsis, no per-type alignment, no rules on children.
+   */
+  | 'custom';
 
 /** Interaction state of a cell. */
 export type CellState = 'default' | 'selected' | 'disabled';
@@ -54,6 +60,7 @@ const BORDER_R = 'border-r-[length:var(--tbl-border-width)] border-r-[var(--tbl-
 
 const headerTypeStyles: Record<HeaderType, string> = {
   checkbox: 'p-0',
+  custom: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py-compact)]',
   sort: 'px-[var(--tbl-cell-px)] py-0',
   text: 'px-[var(--tbl-cell-px)] py-0',
   number: 'px-[var(--tbl-cell-px)] py-0 text-right',
@@ -63,6 +70,9 @@ const headerTypeStyles: Record<HeaderType, string> = {
 
 const cellTypeStyles: Record<CellType, string> = {
   checkbox: 'p-0',
+  // Same breathing room as `button`: enough for a control, not so much that
+  // the row grows.
+  custom: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py-compact)]',
   text: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py)]',
   number: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py)] text-right',
   unit: 'px-[var(--tbl-cell-px)] py-[var(--tbl-cell-py)]',
@@ -96,22 +106,46 @@ function stateClassName(state: CellState, tone: CellTone) {
   return state === 'default' ? cn(cellStateStyles[state], cellToneStyles[tone]) : cellStateStyles[state];
 }
 
-function CellContent({ type, truncate, children }: { type: CellType; truncate: boolean; children: ReactNode }) {
+/** Horizontal placement inside the cell's flex row. */
+export const justifyClassName: Record<Align, string> = {
+  left: 'justify-start',
+  center: 'justify-center',
+  right: 'justify-end',
+};
+
+function CellContent({
+  type,
+  truncate,
+  align,
+  children,
+}: { type: CellType; truncate: boolean; align?: Align; children: ReactNode }) {
   const rightAligned = type === 'number' || type === 'text-dropdown';
   const centerAligned = type === 'checkbox';
   const compound = type === 'text-tag' || type === 'text-button' || type === 'icon-text';
+  // Controls are never truncated — the ellipsis rules reach into children and
+  // would let a fixed-size control shrink.
+  const holdsControl = type === 'checkbox' || type === 'custom';
+
+  // `text-align` does nothing to a flex item sized to its content, so
+  // alignment has to be expressed as `justify-content`. An explicit align
+  // beats the type's default.
+  const justify = align
+    ? justifyClassName[align]
+    : rightAligned
+      ? 'justify-end'
+      : centerAligned
+        ? 'justify-center'
+        : '';
 
   return (
     <div
       className={cn(
         'flex h-full items-center',
-        rightAligned && 'justify-end',
-        centerAligned && 'justify-center',
+        justify,
         compound && 'gap-2',
         // The ellipsis has to live on the element holding the text, not the cell.
-        // Controls are never truncated — that would let them shrink.
         truncate &&
-          !centerAligned &&
+          !holdsControl &&
           'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap [&>*]:min-w-0 [&>*]:truncate',
       )}
     >
@@ -297,6 +331,8 @@ export const TableHead = ({
 
 export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement>, CellVariantProps {
   truncate?: boolean;
+  /** Horizontal placement of the content. Overrides the type's default. */
+  align?: Align;
 }
 
 /** Shared class computation for `<td>` and row-header `<th>`. */
@@ -329,6 +365,7 @@ function bodyCellClassName({
 export const TableCell = ({
   className,
   truncate = true,
+  align,
   type = 'text',
   state = 'default',
   tone = 'none',
@@ -338,7 +375,7 @@ export const TableCell = ({
   ...props
 }: PropsWithChildren<TableCellProps>) => (
   <td className={bodyCellClassName({ type, state, tone, line, rightStroke, truncate, className })} {...props}>
-    <CellContent type={type} truncate={truncate}>
+    <CellContent type={type} truncate={truncate} align={align}>
       {children}
     </CellContent>
   </td>
@@ -346,6 +383,8 @@ export const TableCell = ({
 
 export interface TableRowHeaderCellProps extends ThHTMLAttributes<HTMLTableCellElement>, CellVariantProps {
   truncate?: boolean;
+  /** Horizontal placement of the content. Overrides the type's default. */
+  align?: Align;
 }
 
 /** A `<th scope="row">` styled like a body cell — for tables with a leading label column. */
@@ -353,6 +392,7 @@ export const TableRowHeaderCell = ({
   className,
   scope,
   truncate = true,
+  align,
   type = 'text',
   state = 'default',
   tone = 'none',
@@ -366,7 +406,7 @@ export const TableRowHeaderCell = ({
     scope={scope ?? 'row'}
     {...props}
   >
-    <CellContent type={type} truncate={truncate}>
+    <CellContent type={type} truncate={truncate} align={align}>
       {children}
     </CellContent>
   </th>

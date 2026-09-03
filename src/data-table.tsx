@@ -47,6 +47,7 @@ import { cn } from './lib/utils';
 import {
   type Align,
   type CellState,
+  type CellType,
   Table,
   TableBody,
   TableCell,
@@ -54,6 +55,7 @@ import {
   TableHeader,
   TableRow,
   TableRowHeaderCell,
+  justifyClassName,
 } from './table';
 
 export type { TableCellEdit, TableColumnDef, TableColumnMeta } from './column-meta';
@@ -213,12 +215,6 @@ const alignClassName: Record<Align, string> = {
   right: 'text-right',
 };
 
-const justifyClassName: Record<Align, string> = {
-  left: 'justify-start',
-  center: 'justify-center',
-  right: 'justify-end',
-};
-
 function headerAlign<TData>(meta?: TableColumnMeta<TData>): Align {
   return meta?.headerAlign ?? meta?.align ?? (meta?.numeric ? 'right' : 'left');
 }
@@ -229,6 +225,14 @@ function cellAlign<TData>(meta?: TableColumnMeta<TData>): Align {
 
 function numeric(value: number | string | undefined): number | undefined {
   return typeof value === 'number' ? value : undefined;
+}
+
+/**
+ * Ellipsis is on by default, except for cells that hold a control: clipping a
+ * date picker or a checkbox is never what the caller meant.
+ */
+function truncates<TData>(meta: TableColumnMeta<TData> | undefined, type: CellType): boolean {
+  return meta?.truncate ?? (type !== 'custom' && type !== 'checkbox');
 }
 
 export const SELECTION_COLUMN_ID = 'select';
@@ -628,7 +632,12 @@ export function DataTable<TData>({
               const meta = column.columnDef.meta;
               const sorted = column.getIsSorted();
               const canSort = column.getCanSort();
-              const type = meta?.headerType ?? (canSort ? 'sort' : meta?.numeric ? 'number' : 'text');
+              // A custom body cell usually wants a custom header too, unless the
+              // caller says otherwise.
+              const type =
+                meta?.headerType ??
+                (canSort ? 'sort' : meta?.type === 'custom' ? 'custom' : meta?.numeric ? 'number' : 'text');
+              const headerTruncates = meta?.truncate ?? type !== 'custom';
               const align = headerAlign(meta);
               const pinned = column.getIsPinned();
               const draggableColumn = canReorderColumn(column);
@@ -640,7 +649,7 @@ export function DataTable<TData>({
               const content = (
                 <>
                   {meta?.required && <span className='text-[var(--tbl-required-fg)]'>*</span>}
-                  <span className={cn(meta?.truncate !== false && 'truncate')}>
+                  <span className={cn(headerTruncates && 'truncate')}>
                     {flexRender(column.columnDef.header, header.getContext())}
                   </span>
                   {type === 'sort' && <Sort direction={sorted} />}
@@ -656,7 +665,7 @@ export function DataTable<TData>({
                   rightStroke={meta?.rightStroke ?? true}
                   className={cn(
                     alignClassName[align],
-                    meta?.truncate !== false && 'max-w-0 truncate',
+                    headerTruncates && 'max-w-0 truncate',
                     (enableColumnResizing || draggableColumn) && 'relative',
                     // Sticky cells must be opaque or the rows show through.
                     (stickyHeader || pinned) && 'bg-[var(--tbl-sticky-header-bg)]',
@@ -666,6 +675,7 @@ export function DataTable<TData>({
                     draggableColumn && 'cursor-grab',
                     columnDragState.activeId === column.id && 'opacity-50',
                     columnDropTarget && (columnDragState.after ? DROP_RIGHT : DROP_LEFT),
+                    meta?.headerClassName,
                   )}
                   draggable={draggableColumn || undefined}
                   onDragStart={
@@ -887,19 +897,19 @@ function DataCell<TData>({
   const type = meta?.type ?? (meta?.numeric ? 'number' : 'text');
   const pinned = column.getIsPinned();
 
+  const align = cellAlign(meta);
+  const truncate = truncates(meta, type);
+
   const shared = {
     type,
     state,
+    align,
     tone: meta?.tone ?? 'none',
     line: meta?.line ?? true,
     rightStroke: meta?.rightStroke ?? true,
-    className: cn(
-      alignClassName[cellAlign(meta)],
-      meta?.truncate !== false && 'max-w-0 truncate',
-      pinned && 'sticky z-10',
-    ),
+    className: cn(alignClassName[align], truncate && 'max-w-0 truncate', pinned && 'sticky z-10', meta?.className),
     style: pinStyle(column),
-    truncate: meta?.truncate,
+    truncate,
   } as const;
 
   const isSelectionCell = column.id === SELECTION_COLUMN_ID && meta?.type === 'checkbox';

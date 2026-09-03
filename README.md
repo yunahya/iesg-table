@@ -138,14 +138,52 @@ Layout and cell behaviour are declared on the column, not at the call site.
 | `state` | `'default' \| 'selected' \| 'disabled'` | Usually derived automatically |
 | `tone` | `'none' \| 'muted' \| 'info' \| 'warning' \| 'danger'` | Semantic emphasis on resting cells |
 | `line` / `rightStroke` | `boolean` | Bottom / right border. Default `true` |
+| `className` / `headerClassName` | `string` | Extra classes on the `<td>` / `<th>` |
 | `reorderable` | `boolean` | Opt out of header drag reordering. Default `true` |
 | `exportable` | `boolean` | Drop the column from a CSV export |
 | `exportHeader` | `string` | Export header text when the rendered header is not a string |
 | `exportValue` | `(row) => unknown` | Export value when the cell shows something else |
 
 `CellType` is one of `text`, `number`, `unit`, `memo`, `checkbox`, `tag`, `text-tag`,
-`text-dropdown`, `text-button`, `button`, `icon`, `icon-text`, `switch`. It only controls padding and
-inner flex layout, so rows stay the same height whatever the cell holds.
+`text-dropdown`, `text-button`, `button`, `icon`, `icon-text`, `switch`, `custom`. It only controls
+padding and inner flex layout, so rows stay the same height whatever the cell holds.
+
+## Custom cells
+
+The thirteen described types will not cover everything. `custom` is the type that stops describing
+the content and gets out of the way:
+
+```tsx
+const columns = [
+  {
+    accessorKey: 'due',
+    header: 'Due',
+    meta: { type: 'custom', width: 170 },
+    cell: (ctx) => <DatePicker value={ctx.getValue()} onChange={(v) => save(ctx.row.id, v)} />,
+  },
+  {
+    accessorKey: 'owner',
+    header: 'Owner',
+    // p-0 lets the control fill the cell edge to edge.
+    meta: { type: 'custom', width: 150, className: 'p-0' },
+    cell: (ctx) => <OwnerButton owner={ctx.getValue()} />,
+  },
+];
+```
+
+A `custom` cell keeps the shared row height and borders and drops everything else: no ellipsis, no
+type-driven alignment, no rules applied to children. Padding matches `button`; `meta.className`
+reaches the `<td>` when you need an exception, `meta.headerClassName` the `<th>`, and `meta.align`
+places the content. The header defaults to the `custom` type as well, so a filter input in a header
+lines up with the cells below it.
+
+Two things to know:
+
+- **A popover opened inside a cell is clipped**, because the scroll container is `overflow: auto`.
+  Render calendars and dropdown panels through a portal. Native controls like
+  `<input type="date">` are unaffected — the browser draws their popup outside the page.
+- With `onRowClick`, call `event.stopPropagation()` in your control. The library only does that
+  automatically for the checkbox, the expander and the drag grip.
 
 ## Server-side data
 

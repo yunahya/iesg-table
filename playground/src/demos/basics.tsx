@@ -248,6 +248,7 @@ const CELL_TYPES = [
   'icon',
   'icon-text',
   'switch',
+  'custom',
 ] as const;
 
 function sampleFor(type: (typeof CELL_TYPES)[number]) {
@@ -306,6 +307,14 @@ function sampleFor(type: (typeof CELL_TYPES)[number]) {
           <span className='ml-auto size-3 rounded-full bg-white' />
         </span>
       );
+    case 'custom':
+      return (
+        <input
+          type='date'
+          defaultValue='2026-03-31'
+          className='w-full rounded border border-slate-300 px-1.5 py-1 text-xs'
+        />
+      );
     default:
       return '고정연소';
   }
@@ -318,7 +327,8 @@ export function CellTypes() {
       summary={
         <>
           셀 타입은 패딩과 내부 정렬만 정합니다. 어떤 타입을 써도 행 높이는 <Code>--tbl-row-height</Code> 하나로
-          유지됩니다 — 버튼이 든 행만 살짝 커지는 일이 없습니다.
+          유지됩니다 — 버튼이 든 행만 살짝 커지는 일이 없습니다. 여기에 없는 모양은 <Code>custom</Code>으로 직접
+          넣습니다.
         </>
       }
       customization={[
@@ -332,7 +342,7 @@ export function CellTypes() {
         '내용은 전적으로 사용자의 몫입니다 — 라이브러리는 배치만 하고 태그·버튼·스위치는 직접 렌더링합니다.',
       ]}
       api={[
-        ['meta.type', 'CellType', '13가지 중 하나.'],
+        ['meta.type', 'CellType', '14가지 중 하나. custom은 레이아웃 간섭을 끕니다.'],
         ['meta.align', "'left' | 'center' | 'right'", '타입 기본 정렬을 덮어씁니다.'],
         ['meta.truncate', 'boolean', '기본 true. 말줄임을 끄면 내용이 넘칩니다.'],
       ]}
@@ -358,9 +368,11 @@ export function CellTypes() {
                   ? '오른쪽 정렬'
                   : type === 'checkbox'
                     ? '가운데 정렬, 패딩 없음'
-                    : type.includes('-')
-                      ? 'flex row, gap-2'
-                      : '왼쪽 정렬'}
+                    : type === 'custom'
+                      ? '말줄임·정렬 간섭 없음. 내용은 전부 여러분 것'
+                      : type.includes('-')
+                        ? 'flex row, gap-2'
+                        : '왼쪽 정렬'}
               </TableCell>
             </TableRow>
           ))}

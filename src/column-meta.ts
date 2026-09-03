@@ -28,6 +28,14 @@ export interface TableColumnMeta<TData = unknown> {
   rightStroke?: boolean;
   headerType?: HeaderType;
   headerLine?: boolean;
+  /**
+   * Extra classes on the body `<td>`. The escape hatch for a `custom` cell that
+   * needs something the type system does not describe — `p-0` for a full-bleed
+   * control, say.
+   */
+  className?: string;
+  /** Extra classes on the header `<th>`. */
+  headerClassName?: string;
   /** Opt this column out of drag reordering. Defaults to `true`. */
   reorderable?: boolean;
 

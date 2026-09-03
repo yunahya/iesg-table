@@ -670,4 +670,67 @@ check('shallow identity guard', '', [
   ['primitives compare by value', shallowEqual('a', 'a') && !shallowEqual('a', 'b')],
 ]);
 
+// 27. custom cell type
+{
+  const customColumns: TableColumnDef<Row>[] = [
+    {
+      accessorKey: 'amount',
+      header: 'When',
+      enableSorting: false,
+      meta: { type: 'custom', width: 220, className: 'p-0', headerClassName: 'uppercase' },
+      cell: () => <input type='date' className='w-full' />,
+    },
+  ];
+  const html = renderToStaticMarkup(
+    <DataTable data={data} columns={customColumns} getRowId={(r) => r.id} labels={labels} />,
+  );
+  const head = html.slice(html.indexOf('<thead'), html.indexOf('<tbody'));
+  const body = html.slice(html.indexOf('<tbody'));
+  // renderToStaticMarkup escapes the arbitrary-variant brackets.
+  const unescaped = body.replace(/&amp;/g, '&').replace(/&gt;/g, '>');
+
+  const textOnly = renderToStaticMarkup(
+    <DataTable data={data} columns={columns} getRowId={(r) => r.id} labels={labels} />,
+  );
+
+  check('custom cell type', html, [
+    ['the control is rendered as given', body.includes('<input type="date"')],
+    ['no ellipsis rules reach the control', !unescaped.includes('[&>*]:truncate')],
+    ['the cell is not clipped', !body.includes('max-w-0 truncate')],
+    ['meta.className lands on the td', body.includes('p-0')],
+    ['meta.headerClassName lands on the th', head.includes('uppercase')],
+    ['the header takes the custom padding too', head.includes('py-[var(--tbl-cell-py-compact)]')],
+    ['other cell types still truncate', textOnly.includes('max-w-0 truncate')],
+  ]);
+}
+
+// 28. alignment actually moves content
+{
+  const alignColumns: TableColumnDef<Row>[] = [
+    { accessorKey: 'name', header: 'L', meta: { width: 120, align: 'left' } },
+    { accessorKey: 'amount', header: 'C', meta: { width: 120, align: 'center' } },
+  ];
+  const html = renderToStaticMarkup(
+    <DataTable data={data.slice(0, 1)} columns={alignColumns} getRowId={(r) => r.id} labels={labels} />,
+  );
+  const body = html.slice(html.indexOf('<tbody'));
+  check('cell alignment', html, [
+    // text-align does nothing to a flex item sized to its content; the fix is
+    // justify-content, and this is the regression guard for it.
+    ['center becomes justify-center', body.includes('justify-center')],
+    ['left is explicit rather than implied', body.includes('justify-start')],
+    [
+      'numeric columns still right-align themselves',
+      renderToStaticMarkup(
+        <DataTable
+          data={data.slice(0, 1)}
+          columns={[{ accessorKey: 'amount', header: 'N', meta: { numeric: true, width: 120 } }]}
+          getRowId={(r) => r.id}
+          labels={labels}
+        />,
+      ).includes('justify-end'),
+    ],
+  ]);
+}
+
 console.log('\nAll feature tests passed.');

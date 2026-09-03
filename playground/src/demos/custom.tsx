@@ -287,3 +287,162 @@ export function HandComposed() {
     </DemoPage>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* 커스텀 셀                                                            */
+/* ------------------------------------------------------------------ */
+
+type Plan = { id: string; name: string; due: string; progress: number; owner: string; status: string };
+
+const PLANS: Plan[] = [
+  { id: 'p1', name: 'Scope 1 배출량 집계', due: '2026-03-31', progress: 80, owner: '김선아', status: 'active' },
+  { id: 'p2', name: '제3자 검증 준비', due: '2026-05-15', progress: 35, owner: '이도현', status: 'hold' },
+  { id: 'p3', name: 'CDP 응답서 초안', due: '2026-06-30', progress: 10, owner: '박서준', status: 'active' },
+];
+
+export function CustomCells() {
+  const [rows, setRows] = useState<Plan[]>(PLANS);
+
+  const set = (id: string, patch: Partial<Plan>) =>
+    setRows((previous) => previous.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+
+  const columns = useMemo<TableColumnDef<Plan>[]>(
+    () => [
+      { accessorKey: 'name', header: '과제', meta: { width: 220, rowHeader: true } },
+      {
+        accessorKey: 'due',
+        header: '마감일',
+        meta: { type: 'custom', width: 170 },
+        cell: (ctx) => (
+          <input
+            type='date'
+            value={ctx.getValue<string>()}
+            onChange={(event) => set(ctx.row.original.id, { due: event.target.value })}
+            className='w-full rounded border border-slate-300 px-1.5 py-1 text-xs'
+          />
+        ),
+      },
+      {
+        accessorKey: 'progress',
+        header: '진행률',
+        meta: { type: 'custom', width: 200 },
+        cell: (ctx) => {
+          const value = ctx.getValue<number>();
+          return (
+            <div className='flex w-full items-center gap-2'>
+              <input
+                type='range'
+                min={0}
+                max={100}
+                step={5}
+                value={value}
+                onChange={(event) => set(ctx.row.original.id, { progress: Number(event.target.value) })}
+                className='min-w-0 flex-1 accent-emerald-600'
+              />
+              <span className='w-9 shrink-0 text-right text-slate-500 text-xs tabular-nums'>{value}%</span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'status',
+        header: '상태',
+        meta: { type: 'custom', width: 130 },
+        cell: (ctx) => (
+          <select
+            value={ctx.getValue<string>()}
+            onChange={(event) => set(ctx.row.original.id, { status: event.target.value })}
+            className='w-full rounded border border-slate-300 px-1 py-1 text-xs'
+          >
+            <option value='active'>진행 중</option>
+            <option value='hold'>보류</option>
+            <option value='done'>완료</option>
+          </select>
+        ),
+      },
+      {
+        accessorKey: 'owner',
+        header: '담당',
+        // p-0 makes the control fill the cell edge to edge.
+        meta: { type: 'custom', width: 150, className: 'p-0' },
+        cell: (ctx) => (
+          <button
+            type='button'
+            className='flex h-full w-full items-center justify-center gap-1.5 hover:bg-slate-50'
+            onClick={(event) => event.stopPropagation()}
+          >
+            <span className='inline-flex size-5 items-center justify-center rounded-full bg-slate-200 text-[10px]'>
+              {ctx.getValue<string>().slice(0, 1)}
+            </span>
+            <span className='text-xs'>{ctx.getValue<string>()}</span>
+          </button>
+        ),
+      },
+    ],
+    [],
+  );
+
+  return (
+    <DemoPage
+      title='커스텀 셀'
+      summary={
+        <>
+          셀 타입 13종으로 설명되지 않는 것은 <Code>type: &apos;custom&apos;</Code>으로 넣습니다. 날짜 선택기, 슬라이더,
+          드롭다운, 여러분 디자인 시스템의 아무 컴포넌트나 그대로 렌더링됩니다.
+        </>
+      }
+      customization={[
+        <>
+          <Code>custom</Code>은 <strong>레이아웃 간섭을 그만두는</strong> 타입입니다 — 말줄임 없음, 타입별 정렬 없음,
+          자식 요소에 거는 규칙 없음. 행 높이와 테두리만 공통으로 유지합니다.
+        </>,
+        <>
+          여백은 <Code>button</Code> 타입과 같습니다. 셀을 가장자리까지 채우려면{' '}
+          <Code>meta.className: &apos;p-0&apos;</Code>을 주세요 — 아래 &lsquo;담당&rsquo; 컬럼이 그렇습니다.
+        </>,
+        <>
+          <Code>meta.align</Code>으로 가로 정렬을 지정합니다. <Code>meta.headerClassName</Code>은 헤더 <Code>th</Code>에
+          붙습니다.
+        </>,
+        <>
+          헤더도 별도 지정이 없으면 <Code>custom</Code>이 됩니다 — 헤더에 필터 입력을 넣어도 여백이 맞습니다.
+        </>,
+      ]}
+      api={[
+        ['meta.type', "'custom'", '레이아웃 간섭을 끕니다.'],
+        ['cell', '(ctx) => ReactNode', '평소와 같은 TanStack 셀 렌더러. 여기에 컴포넌트를 넣습니다.'],
+        ['meta.className', 'string', '본문 td에 붙는 클래스. p-0 같은 예외를 넣는 곳.'],
+        ['meta.headerClassName', 'string', '헤더 th에 붙는 클래스.'],
+        ['meta.align', "'left' | 'center' | 'right'", '셀 안에서의 가로 정렬.'],
+      ]}
+      caveats={[
+        <>
+          <strong>셀 밖으로 열리는 팝오버는 잘립니다.</strong> 테이블 스크롤 컨테이너가 <Code>overflow: auto</Code>이기
+          때문입니다. 달력·드롭다운 패널을 띄우는 컴포넌트는 <Code>portal</Code>로 body에 붙여 쓰세요. 아래{' '}
+          <Code>&lt;input type=&quot;date&quot;&gt;</Code>는 브라우저 기본 달력이라 문제가 없습니다.
+        </>,
+        <>
+          행 클릭(<Code>onRowClick</Code>)을 함께 쓴다면 컨트롤에서 <Code>event.stopPropagation()</Code>을 불러주세요.
+          라이브러리가 자동으로 막아주는 건 체크박스·확장 화살표·드래그 손잡이뿐입니다.
+        </>,
+        <>
+          행 높이는 <Code>--tbl-row-height</Code>로 고정입니다. 더 큰 컨트롤을 넣으려면 이 변수를 올리세요.
+        </>,
+      ]}
+    >
+      <div className='space-y-3'>
+        <DataTable data={rows} columns={columns} getRowId={(row) => row.id} labels={labels} />
+        <Note>
+          전부 실제로 동작합니다 — 날짜를 바꾸고 슬라이더를 끌어보세요. 값은 부모 컴포넌트의 상태로 올라갑니다.
+        </Note>
+        <pre className='rounded border border-slate-200 bg-slate-50 p-2 font-mono text-[11px] text-slate-700'>
+          {JSON.stringify(
+            rows.map(({ id, due, progress, status }) => ({ id, due, progress, status })),
+            null,
+            1,
+          )}
+        </pre>
+      </div>
+    </DemoPage>
+  );
+}

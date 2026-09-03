@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import { Reference } from './Reference';
 import { CellTypes, Pagination, Selection, Sorting, StatesAndTones, StatusStates } from './demos/basics';
-import { ComponentSlots, HandComposed, InlineEditing } from './demos/custom';
+import { ComponentSlots, CustomCells, HandComposed, InlineEditing } from './demos/custom';
 import { ColumnReorder, ColumnVisibility, Export, Filtering, Grouping, RowReorder } from './demos/dataops';
 import { Expansion, Resizing, StickyAndPinning, Virtualised } from './demos/layout';
 import { Overview } from './demos/overview';
@@ -31,7 +31,7 @@ export const GROUPS: Group[] = [
       { id: 'sorting', label: '정렬', hint: '클라이언트 · 서버 정렬', Component: Sorting },
       { id: 'selection', label: '행 선택', hint: '체크박스, 전체선택', Component: Selection },
       { id: 'pagination', label: '페이지네이션', hint: '서버 연동, 페이지 간 선택 유지', Component: Pagination },
-      { id: 'cell-types', label: '셀 타입', hint: '13가지, 행 높이는 그대로', Component: CellTypes },
+      { id: 'cell-types', label: '셀 타입', hint: '13종 + custom, 행 높이는 그대로', Component: CellTypes },
       { id: 'states', label: '상태와 톤', hint: '두 축이 겹칠 때의 규칙', Component: StatesAndTones },
       { id: 'status', label: '로딩 · 빈 상태', hint: '스크린리더에 읽히는 방식', Component: StatusStates },
     ],
@@ -60,6 +60,7 @@ export const GROUPS: Group[] = [
     title: '편집 · 커스터마이징',
     entries: [
       { id: 'editing', label: '인라인 편집', hint: '셀에서 바로 수정', Component: InlineEditing },
+      { id: 'custom-cells', label: '커스텀 셀', hint: '원하는 컴포넌트를 셀에 그대로', Component: CustomCells },
       { id: 'slots', label: '컴포넌트 교체', hint: '체크박스 · 정렬 아이콘', Component: ComponentSlots },
       { id: 'primitives', label: '프리미티브 직접 조합', hint: 'DataTable 없이 짜기', Component: HandComposed },
     ],
