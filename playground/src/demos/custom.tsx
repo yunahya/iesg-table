@@ -456,11 +456,7 @@ export function CustomCells() {
     >
       <div className='space-y-3'>
         <DataTable data={rows} columns={columns} getRowId={(row) => row.id} labels={labels} />
-        <Note>
-          전부 실제로 동작합니다 — 날짜를 바꾸고, 슬라이더를 끌고, &lsquo;담당&rsquo;을 눌러 이름이나 팀으로 검색해
-          보세요. 팝오버 안에서는 <Code>↑↓</Code>로 이동하고 <Code>Enter</Code>로 선택, <Code>Escape</Code>로 닫습니다.
-          값은 전부 부모 컴포넌트의 상태로 올라갑니다.
-        </Note>
+     
         <pre className='rounded border border-slate-200 bg-slate-50 p-2 font-mono text-[11px] text-slate-700'>
           {JSON.stringify(
             rows.map(({ id, due, progress, status }) => ({ id, due, progress, status })),

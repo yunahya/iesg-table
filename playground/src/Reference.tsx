@@ -160,7 +160,8 @@ const FEATURES: ReactNode[][] = [
     <Code key='k'>type: 'custom'</Code>,
     <span key='o'>
       <Origin kind='own' />
-      레이아웃 간섭을 끄는 타입입니다. <Code>meta.className</Code>으로 <Code>td</Code>까지 손댈 수 있습니다
+      레이아웃 간섭을 끄는 타입입니다. <Code>meta.className</Code>으로 <Code>td</Code>까지 손댈 수 있고, 팝오버는
+      portal로 띄웁니다
     </span>,
   ],
   [
