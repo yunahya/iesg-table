@@ -37,3 +37,30 @@ export function SortIcon({ direction, className }: SortIconProps) {
     </svg>
   );
 }
+
+const CHEVRON =
+  'M6.697 0.219671C6.98989 0.512565 6.98989 0.98744 6.697 1.28033L1.81066 6.16668L6.697 11.053C6.98989 11.3459 6.98989 11.8208 6.697 12.1137C6.4041 12.4066 5.92923 12.4066 5.63634 12.1137L0.21967 6.69702C-0.0732233 6.40412 -0.0732233 5.92925 0.21967 5.63635L5.63634 0.219671C5.92923 -0.0732235 6.4041 -0.0732235 6.697 0.219671Z';
+
+export interface ChevronIconProps {
+  direction: 'left' | 'right';
+  className?: string;
+}
+
+/**
+ * Single chevron used by the pagination arrows. The path points left; the
+ * right variant is the same geometry mirrored, so both render identically.
+ */
+export function ChevronIcon({ direction, className }: ChevronIconProps) {
+  return (
+    <svg
+      className={cn('h-[13px] w-[7px] shrink-0', direction === 'right' && '-scale-x-100', className)}
+      viewBox='0 0 7 13'
+      fill='none'
+      xmlns='http://www.w3.org/2000/svg'
+      aria-hidden='true'
+      focusable='false'
+    >
+      <path d={CHEVRON} fill='currentColor' />
+    </svg>
+  );
+}

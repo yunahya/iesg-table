@@ -172,7 +172,8 @@ export function Pagination() {
       }
       customization={[
         <>
-          모든 문구는 <Code>pagination.labels</Code>로 넘깁니다 — 하드코딩된 한국어/영어가 없습니다.
+          모든 문구는 <Code>pagination.labels</Code>로 넘깁니다. 줄 수 선택지의 표기만 기본값이 있고(
+          <Code>N줄 보기</Code>), <Code>labels.pageSizeOption</Code>으로 덮어씁니다.
         </>,
         <>
           <Code>pageSizeOptions</Code>로 선택지를 바꿉니다. <Code>onPageSizeChange</Code>를 안 주면 선택 UI가
@@ -188,6 +189,8 @@ export function Pagination() {
       api={[
         ['pagination.page / pageSize / totalCount', 'number', '서버가 알려주는 값 그대로.'],
         ['onPageChange / onPageSizeChange', '(n) => void', '페이지 이동.'],
+        ['pageSizeOptions', 'number[]', '줄 수 선택지. 기본 [10, 20, 50, 100].'],
+        ['labels.pageSizeOption', '(size) => string', '선택지 표기. 기본 `${size}줄 보기`.'],
         ['manualSorting', 'boolean', '정렬된 data를 받는다는 선언. 정렬은 서버 쿼리에 맡깁니다.'],
         ["selectAllMode: 'all'", '-', '헤더 체크박스가 전체 95행을 선택합니다.'],
       ]}

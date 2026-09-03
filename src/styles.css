@@ -121,6 +121,24 @@
     --tbl-spinner-track: #e8ebed;
     --tbl-spinner-indicator: #1ad98a;
 
+    /* ---------- dropdown ---------- */
+    --tbl-dropdown-height: 30px;
+    --tbl-dropdown-radius: 6px;
+    --tbl-dropdown-bg: #ffffff;
+    --tbl-dropdown-fg: #5c5f66;
+    --tbl-dropdown-border: var(--tbl-border);
+    --tbl-dropdown-hover-bg: #fafafa;
+    --tbl-dropdown-selected-fg: #181818;
+    --tbl-dropdown-menu-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+    --tbl-dropdown-menu-max-height: 240px;
+
+    /* ---------- pagination ---------- */
+    --tbl-pagination-fg: #5c5f66;
+    --tbl-pagination-hover-bg: #fafafa;
+    --tbl-pagination-active-bg: #fafafa;
+    --tbl-pagination-active-fg: #181818;
+    --tbl-pagination-radius: 4px;
+
     /* ---------- misc ---------- */
     --tbl-empty-fg: #a2a6a9;
     --tbl-required-fg: #ff5630;

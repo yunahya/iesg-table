@@ -345,7 +345,6 @@ const FEATURES: ReactNode[][] = [
   ],
 ];
 
-
 const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
   {
     title: '구조',
@@ -459,6 +458,32 @@ const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
     tokens: ['--tbl-edit-bg', '--tbl-edit-fg', '--tbl-edit-border', '--tbl-edit-hover-bg'],
   },
   {
+    title: '페이지네이션',
+    note: '페이지 번호 버튼과 현재 페이지 표시',
+    tokens: [
+      '--tbl-pagination-fg',
+      '--tbl-pagination-hover-bg',
+      '--tbl-pagination-active-bg',
+      '--tbl-pagination-active-fg',
+      '--tbl-pagination-radius',
+    ],
+  },
+  {
+    title: '드롭다운',
+    note: '줄 수 선택 등에 쓰는 listbox. 트리거는 Button/Small 규격입니다',
+    tokens: [
+      '--tbl-dropdown-height',
+      '--tbl-dropdown-radius',
+      '--tbl-dropdown-bg',
+      '--tbl-dropdown-fg',
+      '--tbl-dropdown-border',
+      '--tbl-dropdown-hover-bg',
+      '--tbl-dropdown-selected-fg',
+      '--tbl-dropdown-menu-shadow',
+      '--tbl-dropdown-menu-max-height',
+    ],
+  },
+  {
     title: '로딩',
     note: '헤더는 그대로 두고, 대체 행을 흐리게 깔고 그 위에 스피너',
     tokens: [
@@ -534,8 +559,6 @@ export function Reference() {
       >
         <Rows head={['기능', '설명', 'API', '어디서 오는가']} rows={FEATURES} />
       </Card>
-
-
 
       {/* 커스터마이징 */}
       <Card title='커스터마이징은 어디까지 되나' subtitle='아래로 갈수록 자유도가 높고, 손이 더 많이 갑니다.'>

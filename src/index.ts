@@ -83,7 +83,8 @@ export { EditableCell, type EditableCellProps } from './components/editable-cell
 
 /* Default slot components — swap them out via `<DataTable components={...} />`. */
 export { TableCheckbox, CheckboxIcon, CHECKBOX_SIZE, type TableCheckboxProps } from './components/checkbox';
-export { SortIcon, type SortIconProps } from './components/icons';
+export { SortIcon, ChevronIcon, type SortIconProps, type ChevronIconProps } from './components/icons';
+export { TableDropdown, type DropdownOption, type DropdownProps } from './components/dropdown';
 export { TablePagination, type PaginationLabels, type PaginationProps } from './components/pagination';
 
 /* Utility, exported so consumers can compose class names the same way. */

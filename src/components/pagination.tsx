@@ -1,4 +1,6 @@
 import { cn } from '../lib/utils';
+import { TableDropdown } from './dropdown';
+import { ChevronIcon } from './icons';
 
 export interface PaginationLabels {
   previous: string;
@@ -7,6 +9,11 @@ export interface PaginationLabels {
   page: (page: number) => string;
   /** Accessible name for the rows-per-page select. */
   pageSize: string;
+  /**
+   * Visible text of one rows-per-page option.
+   * Defaults to `(size) => \`${size}줄 보기\``.
+   */
+  pageSizeOption?: (size: number) => string;
 }
 
 export interface PaginationProps {
@@ -24,6 +31,8 @@ export interface PaginationProps {
 }
 
 const GAP = '…';
+
+const defaultPageSizeOption = (size: number): string => `${size}줄 보기`;
 
 /** Page numbers to render, with `null` marking a gap. */
 function buildPageList(current: number, total: number, siblings: number): (number | null)[] {
@@ -43,11 +52,15 @@ function buildPageList(current: number, total: number, siblings: number): (numbe
   return pages;
 }
 
+/** 20x30 hit area, 14px Pretendard body-2 metrics, per the design system. */
 const buttonBase = cn(
-  'inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm',
+  'inline-flex h-[30px] min-w-5 items-center justify-center px-0.5',
+  'rounded-[var(--tbl-pagination-radius)] text-sm leading-[1.5] tracking-[-0.03em]',
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tbl-focus-ring)]',
   'disabled:cursor-not-allowed disabled:opacity-40',
 );
+
+const arrowButton = cn(buttonBase, 'text-[var(--tbl-pagination-fg)]');
 
 export function TablePagination({
   page,
@@ -64,48 +77,27 @@ export function TablePagination({
   const totalPages = Math.max(1, Math.ceil(Math.max(0, totalCount) / safePageSize));
   const current = Math.min(Math.max(1, page), totalPages);
   const pages = buildPageList(current, totalPages, Math.max(0, siblingCount));
+  const formatPageSize = labels.pageSizeOption ?? defaultPageSizeOption;
 
   return (
-    <nav className={cn('flex items-center justify-between gap-4 py-2', className)} aria-label='pagination'>
-      {onPageSizeChange ? (
-        <label className='flex items-center gap-2 text-sm text-[var(--tbl-header-fg)]'>
-          <span className='sr-only'>{labels.pageSize}</span>
-          <select
-            className={cn(
-              'h-8 rounded border-[length:var(--tbl-border-width)] border-[var(--tbl-border)]',
-              'bg-[var(--tbl-cell-bg)] px-2 text-sm text-[var(--tbl-cell-fg)]',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tbl-focus-ring)]',
-            )}
-            value={safePageSize}
-            aria-label={labels.pageSize}
-            onChange={(event) => onPageSizeChange(Number(event.target.value))}
-          >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : (
-        <span />
-      )}
+    <nav className={cn('grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-2', className)} aria-label='pagination'>
+      <span />
 
       <div className='flex items-center gap-1'>
         <button
           type='button'
-          className={cn(buttonBase, 'text-[var(--tbl-cell-fg)] hover:bg-[var(--tbl-row-hover-bg)]')}
+          className={arrowButton}
           disabled={current <= 1}
           aria-label={labels.previous}
           onClick={() => onPageChange(current - 1)}
         >
-          ‹
+          <ChevronIcon direction='left' />
         </button>
 
         {pages.map((entry, index) =>
           entry === null ? (
             // biome-ignore lint/suspicious/noArrayIndexKey: gap markers have no stable identity
-            <span key={`gap-${index}`} className='px-1 text-sm text-[var(--tbl-empty-fg)]' aria-hidden='true'>
+            <span key={`gap-${index}`} className={cn(buttonBase, 'text-[var(--tbl-pagination-fg)]')} aria-hidden='true'>
               {GAP}
             </span>
           ) : (
@@ -115,8 +107,8 @@ export function TablePagination({
               className={cn(
                 buttonBase,
                 entry === current
-                  ? 'bg-[var(--tbl-row-selected-bg)] font-medium text-[var(--tbl-row-selected-fg)]'
-                  : 'text-[var(--tbl-cell-fg)] hover:bg-[var(--tbl-row-hover-bg)]',
+                  ? 'bg-[var(--tbl-pagination-active-bg)] font-medium text-[var(--tbl-pagination-active-fg)]'
+                  : 'text-[var(--tbl-pagination-fg)] hover:bg-[var(--tbl-pagination-hover-bg)]',
               )}
               aria-label={labels.page(entry)}
               aria-current={entry === current ? 'page' : undefined}
@@ -129,13 +121,26 @@ export function TablePagination({
 
         <button
           type='button'
-          className={cn(buttonBase, 'text-[var(--tbl-cell-fg)] hover:bg-[var(--tbl-row-hover-bg)]')}
+          className={arrowButton}
           disabled={current >= totalPages}
           aria-label={labels.next}
           onClick={() => onPageChange(current + 1)}
         >
-          ›
+          <ChevronIcon direction='right' />
         </button>
+      </div>
+
+      <div className='flex justify-end'>
+        {onPageSizeChange ? (
+          <TableDropdown
+            value={safePageSize}
+            options={pageSizeOptions.map((size) => ({ value: size, label: formatPageSize(size) }))}
+            onChange={onPageSizeChange}
+            label={labels.pageSize}
+            placement='top'
+            align='end'
+          />
+        ) : null}
       </div>
     </nav>
   );

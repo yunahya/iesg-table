@@ -166,7 +166,8 @@ function check(name: string, html: string, expectations: Array<[string, boolean]
     ['nav rendered', html.includes('aria-label="pagination"')],
     ['current page marked', html.includes('aria-current="page"')],
     ['10 pages total', html.includes('page 10')],
-    ['page size select', html.includes('<select')],
+    ['page size dropdown', html.includes('aria-haspopup="listbox"')],
+    ['page size label formatted', html.includes('줄 보기')],
   ]);
 }
 
