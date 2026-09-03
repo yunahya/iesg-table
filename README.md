@@ -179,9 +179,11 @@ lines up with the cells below it.
 
 Two things to know:
 
-- **A popover opened inside a cell is clipped**, because the scroll container is `overflow: auto`.
-  Render calendars and dropdown panels through a portal. Native controls like
-  `<input type="date">` are unaffected — the browser draws their popup outside the page.
+- **A popover drawn inside a cell is clipped**, because the scroll container is `overflow: auto`.
+  Render calendars and dropdown panels through `createPortal` into `document.body`, and keep their
+  position in sync with scroll and resize — the cell moves, the portalled panel does not. A worked
+  searchable picker is in `playground/src/SearchSelect.tsx`. Native controls like
+  `<input type="date">` need none of this: the browser draws their popup outside the page.
 - With `onRowClick`, call `event.stopPropagation()` in your control. The library only does that
   automatically for the checkbox, the expander and the drag grip.
 

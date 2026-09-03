@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   DataTable,
   EditableCell,
@@ -14,6 +14,7 @@ import {
   TableRow,
   createSelectionColumn,
 } from '../../../src/index';
+import { type SearchOption, SearchSelect } from '../SearchSelect';
 import { baseColumns } from '../columns';
 import { type Emission, emissions, labels, num } from '../data';
 import { Code, DemoPage, Note } from '../ui';
@@ -294,6 +295,21 @@ export function HandComposed() {
 
 type Plan = { id: string; name: string; due: string; progress: number; owner: string; status: string };
 
+const PEOPLE: SearchOption[] = [
+  { value: '김선아', label: '김선아', hint: '지속가능경영' },
+  { value: '이도현', label: '이도현', hint: '지속가능경영' },
+  { value: '박서준', label: '박서준', hint: '환경안전' },
+  { value: '최유진', label: '최유진', hint: '환경안전' },
+  { value: '정민수', label: '정민수', hint: '재무' },
+  { value: '한지우', label: '한지우', hint: '재무' },
+  { value: '오세영', label: '오세영', hint: '생산기술' },
+  { value: '윤태호', label: '윤태호', hint: '생산기술' },
+  { value: '강나래', label: '강나래', hint: '구매' },
+  { value: '임현우', label: '임현우', hint: '구매' },
+  { value: '서지훈', label: '서지훈', hint: 'IT' },
+  { value: '문가영', label: '문가영', hint: 'IT' },
+];
+
 const PLANS: Plan[] = [
   { id: 'p1', name: 'Scope 1 배출량 집계', due: '2026-03-31', progress: 80, owner: '김선아', status: 'active' },
   { id: 'p2', name: '제3자 검증 준비', due: '2026-05-15', progress: 35, owner: '이도현', status: 'hold' },
@@ -303,8 +319,12 @@ const PLANS: Plan[] = [
 export function CustomCells() {
   const [rows, setRows] = useState<Plan[]>(PLANS);
 
-  const set = (id: string, patch: Partial<Plan>) =>
-    setRows((previous) => previous.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+  // Stable, so the column definitions below can be memoised honestly.
+  const set = useCallback(
+    (id: string, patch: Partial<Plan>) =>
+      setRows((previous) => previous.map((row) => (row.id === id ? { ...row, ...patch } : row))),
+    [],
+  );
 
   const columns = useMemo<TableColumnDef<Plan>[]>(
     () => [
@@ -363,23 +383,20 @@ export function CustomCells() {
       {
         accessorKey: 'owner',
         header: '담당',
-        // p-0 makes the control fill the cell edge to edge.
-        meta: { type: 'custom', width: 150, className: 'p-0' },
+        // p-0 lets the trigger fill the cell edge to edge.
+        meta: { type: 'custom', width: 170, className: 'p-0' },
         cell: (ctx) => (
-          <button
-            type='button'
-            className='flex h-full w-full items-center justify-center gap-1.5 hover:bg-slate-50'
-            onClick={(event) => event.stopPropagation()}
-          >
-            <span className='inline-flex size-5 items-center justify-center rounded-full bg-slate-200 text-[10px]'>
-              {ctx.getValue<string>().slice(0, 1)}
-            </span>
-            <span className='text-xs'>{ctx.getValue<string>()}</span>
-          </button>
+          <SearchSelect
+            label='담당자 선택'
+            placeholder='이름·팀으로 검색…'
+            value={ctx.getValue<string>()}
+            options={PEOPLE}
+            onChange={(owner) => set(ctx.row.original.id, { owner })}
+          />
         ),
       },
     ],
-    [],
+    [set],
   );
 
   return (
@@ -407,6 +424,11 @@ export function CustomCells() {
         <>
           헤더도 별도 지정이 없으면 <Code>custom</Code>이 됩니다 — 헤더에 필터 입력을 넣어도 여백이 맞습니다.
         </>,
+        <>
+          &lsquo;담당&rsquo;처럼 <strong>팝오버가 열리는 컨트롤</strong>은 패널을 <Code>createPortal</Code>로{' '}
+          <Code>document.body</Code>에 붙이세요. 셀 안에 그리면 테이블 스크롤 영역에 잘립니다. 예제 코드는{' '}
+          <Code>playground/src/SearchSelect.tsx</Code>에 있습니다.
+        </>,
       ]}
       api={[
         ['meta.type', "'custom'", '레이아웃 간섭을 끕니다.'],
@@ -414,12 +436,14 @@ export function CustomCells() {
         ['meta.className', 'string', '본문 td에 붙는 클래스. p-0 같은 예외를 넣는 곳.'],
         ['meta.headerClassName', 'string', '헤더 th에 붙는 클래스.'],
         ['meta.align', "'left' | 'center' | 'right'", '셀 안에서의 가로 정렬.'],
+        ['createPortal', 'react-dom', '팝오버를 body에 붙여 잘림을 피하는 방법.'],
       ]}
       caveats={[
         <>
-          <strong>셀 밖으로 열리는 팝오버는 잘립니다.</strong> 테이블 스크롤 컨테이너가 <Code>overflow: auto</Code>이기
-          때문입니다. 달력·드롭다운 패널을 띄우는 컴포넌트는 <Code>portal</Code>로 body에 붙여 쓰세요. 아래{' '}
-          <Code>&lt;input type=&quot;date&quot;&gt;</Code>는 브라우저 기본 달력이라 문제가 없습니다.
+          <strong>셀 안에 그린 팝오버는 잘립니다.</strong> 테이블 스크롤 컨테이너가 <Code>overflow: auto</Code>이기
+          때문입니다. 아래 &lsquo;담당&rsquo; 컬럼이 이걸 portal로 우회한 예시입니다 — 대신 위치를 직접 계산하고,
+          스크롤·리사이즈에 맞춰 따라가게 해야 합니다. <Code>&lt;input type=&quot;date&quot;&gt;</Code> 같은 네이티브
+          컨트롤은 브라우저가 페이지 밖에 그리므로 신경 쓸 게 없습니다.
         </>,
         <>
           행 클릭(<Code>onRowClick</Code>)을 함께 쓴다면 컨트롤에서 <Code>event.stopPropagation()</Code>을 불러주세요.
@@ -433,7 +457,9 @@ export function CustomCells() {
       <div className='space-y-3'>
         <DataTable data={rows} columns={columns} getRowId={(row) => row.id} labels={labels} />
         <Note>
-          전부 실제로 동작합니다 — 날짜를 바꾸고 슬라이더를 끌어보세요. 값은 부모 컴포넌트의 상태로 올라갑니다.
+          전부 실제로 동작합니다 — 날짜를 바꾸고, 슬라이더를 끌고, &lsquo;담당&rsquo;을 눌러 이름이나 팀으로 검색해
+          보세요. 팝오버 안에서는 <Code>↑↓</Code>로 이동하고 <Code>Enter</Code>로 선택, <Code>Escape</Code>로 닫습니다.
+          값은 전부 부모 컴포넌트의 상태로 올라갑니다.
         </Note>
         <pre className='rounded border border-slate-200 bg-slate-50 p-2 font-mono text-[11px] text-slate-700'>
           {JSON.stringify(

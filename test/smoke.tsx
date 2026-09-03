@@ -627,7 +627,9 @@ check('key to direction', '', [
       clear: () => map.clear(),
       getItem: (key: string) => map.get(key) ?? null,
       key: (index: number) => [...map.keys()][index] ?? null,
-      removeItem: (key: string) => map.delete(key) as unknown as void,
+      removeItem: (key: string) => {
+        map.delete(key);
+      },
       setItem: (key: string, value: string) => void map.set(key, value),
     };
   };
