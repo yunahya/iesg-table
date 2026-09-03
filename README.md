@@ -504,3 +504,4 @@ virtualisation with `renderSubRow` panels.
 
 MIT — see [LICENSE](./LICENSE). Builds on TanStack Table (MIT) as an unmodified peer dependency; see
 [NOTICE](./NOTICE). Not affiliated with or endorsed by TanStack.
+# iesg-table
