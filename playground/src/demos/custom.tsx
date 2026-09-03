@@ -183,7 +183,7 @@ export function ComponentSlots() {
   return (
     <DemoPage
       title='컴포넌트 교체'
-      summary='체크박스와 정렬 아이콘은 슬롯입니다. 사용자의 디자인 시스템 컴포넌트를 그대로 꽂으면 됩니다 — 아래는 토글 스위치와 글자 표시기로 바꾼 같은 테이블입니다.'
+      summary='제공하는 디폴트 테이블을 커스터마이징. 체크박스와 정렬 아이콘은 슬롯입니다. 사용자의 디자인 시스템 컴포넌트를 그대로 꽂으면 됩니다 — 아래는 토글 스위치와 글자 표시기로 바꾼 같은 테이블입니다.'
       customization={[
         <>
           <Code>components.Checkbox</Code>는 <Code>{'{ checked, onChange, label, disabled }'}</Code>를 받습니다.{' '}

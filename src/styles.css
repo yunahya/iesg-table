@@ -57,6 +57,10 @@
     --tbl-cell-hover-bg: #def6e5;
     --tbl-row-selected-bg: #def6e5;
     --tbl-row-selected-fg: #242424;
+    /* Nested rows mix this into the cell background, once per level. Set the
+       step to 0% to switch depth shading off. */
+    --tbl-row-depth-tint: #a7adb2;
+    --tbl-row-depth-step: 14%;
     --tbl-row-disabled-bg: #f2f4f6;
     --tbl-row-disabled-fg: #a7adb2;
     --tbl-focus-ring: #1ad98a;

@@ -714,7 +714,41 @@ check('shallow identity guard', '', [
   ]);
 }
 
-// 28. alignment actually moves content
+// 28. nested rows darken with depth
+{
+  type Node = { id: string; name: string; children?: Node[] };
+  const deep: Node[] = [
+    {
+      id: 'a',
+      name: 'A',
+      children: [{ id: 'a1', name: 'A1', children: [{ id: 'a1x', name: 'A1X' }] }],
+    },
+  ];
+  const deepColumns: TableColumnDef<Node>[] = [
+    createExpanderColumn<Node>(),
+    { accessorKey: 'name', header: 'N', meta: { width: 200 } },
+  ];
+  const html = renderToStaticMarkup(
+    <DataTable
+      data={deep}
+      columns={deepColumns}
+      getRowId={(r) => r.id}
+      labels={labels}
+      getSubRows={(r) => r.children}
+      expanded={true}
+    />,
+  );
+  const multipliers = [...html.matchAll(/calc\((\d+) \* var\(--tbl-row-depth-step\)\)/g)].map((m) => m[1]);
+
+  check('depth shading', html, [
+    ['one tinted row per level below the root', multipliers.join(',') === '1,2'],
+    ['the top-level row is left alone', (html.match(/style="--tbl-row-bg/g)?.length ?? 0) === 2],
+    ['cells read the row variable with a fallback', html.includes('bg-[var(--tbl-row-bg,var(--tbl-cell-bg))]')],
+    ['the tint is mixed, not hardcoded', html.includes('var(--tbl-row-depth-tint)')],
+  ]);
+}
+
+// 29. alignment actually moves content
 {
   const alignColumns: TableColumnDef<Row>[] = [
     { accessorKey: 'name', header: 'L', meta: { width: 120, align: 'left' } },

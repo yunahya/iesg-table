@@ -88,7 +88,10 @@ const cellTypeStyles: Record<CellType, string> = {
 };
 
 const cellStateStyles: Record<CellState, string> = {
-  default: 'bg-[var(--tbl-cell-bg)] text-[var(--tbl-cell-fg)]',
+  // `--tbl-row-bg` is what a row sets to tint itself by nesting depth. It is
+  // read here rather than written at :root, so the fallback stays the token a
+  // consumer would override.
+  default: 'bg-[var(--tbl-row-bg,var(--tbl-cell-bg))] text-[var(--tbl-cell-fg)]',
   selected: 'bg-[var(--tbl-row-selected-bg)] text-[var(--tbl-row-selected-fg)]',
   disabled: 'bg-[var(--tbl-cell-disabled-bg)] text-[var(--tbl-cell-disabled-fg)]',
 };

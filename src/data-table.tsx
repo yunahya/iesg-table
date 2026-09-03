@@ -25,6 +25,7 @@ import {
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
+  type CSSProperties,
   type ComponentType,
   type DragEvent,
   type MutableRefObject,
@@ -873,6 +874,17 @@ function DataRow<TData>({
   const dragging = drag?.activeId === row.id;
   const dropTarget = drag?.activeId != null && drag.activeId !== row.id && drag.overId === row.id;
 
+  // Each level down mixes one more step of the tint into the cell background,
+  // so a child is always a shade darker than its parent — at any depth, with
+  // no per-level tokens to keep in sync. Selected and disabled rows read a
+  // different variable, so they keep their own colour.
+  const depthStyle =
+    row.depth > 0
+      ? ({
+          '--tbl-row-bg': `color-mix(in srgb, var(--tbl-row-depth-tint) calc(${row.depth} * var(--tbl-row-depth-step)), var(--tbl-cell-bg))`,
+        } as CSSProperties)
+      : undefined;
+
   return (
     <TableRow
       selected={selected}
@@ -886,6 +898,7 @@ function DataRow<TData>({
         dropTarget && (drag.after ? DROP_BELOW : DROP_ABOVE),
         className,
       )}
+      style={depthStyle}
       onClick={() => onRowClick?.(row.original)}
       onDragOver={
         drag?.activeId

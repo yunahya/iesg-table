@@ -332,7 +332,11 @@ Or a full-width panel under the row:
 ```
 
 Sub-rows are ordinary rows, so sorting, filtering and selection apply to them and `row.depth` drives
-the indent, at any depth. `renderSubRow` cannot be combined with virtualisation — a panel breaks the fixed
+the indent, at any depth, and each level mixes one more step of `--tbl-row-depth-tint` into the cell
+background so a child always reads as a shade darker than its parent (`--tbl-row-depth-step: 0%`
+turns that off). Selected and disabled rows keep their own colour.
+
+`renderSubRow` cannot be combined with virtualisation — a panel breaks the fixed
 row-to-index mapping.
 
 ## Resizing, sticky header, pinned columns

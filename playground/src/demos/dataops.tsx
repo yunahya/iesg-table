@@ -295,9 +295,15 @@ export function Grouping() {
 
   return (
     <DemoPage
-      title='그룹 · 집계'
+      title='[아마 안 쓸 듯] 그룹 · 집계'
       summary={
         <>
+          <strong>
+            그룹 · 집계는 사실 백엔드에서 데이터 요청하는대로 보여주는 구조일거라 거의 쓸 일이 없을 것 같습니다.
+            참고용으로만 넣어놓음
+          </strong>{' '}
+          <br />
+          <br />
           컬럼 id를 <Code>grouping</Code>에 넣으면 그 값으로 행이 묶이고, 그룹 행에는 하위 개수와 집계값이 표시됩니다.
           두 개를 넣으면 2단으로 중첩됩니다.
         </>

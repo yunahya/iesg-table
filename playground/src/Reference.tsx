@@ -237,7 +237,7 @@ const FEATURES: ReactNode[][] = [
   ],
   [
     '행 확장',
-    '뎁스 있는 테이블(getSubRows, 깊이 제한 없음) 또는 테이블 토글(renderSubRow)',
+    '뎁스 있는 테이블(getSubRows, 깊이 제한 없음, 단계마다 배경이 진해짐) 또는 테이블 토글(renderSubRow)',
     <Code key='k'>expanded</Code>,
     <span key='o'>
       <Origin kind='mixed' />
@@ -442,8 +442,8 @@ const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
   },
   {
     title: '행 확장',
-    note: '펼침 아이콘과 토글 영역 배경',
-    tokens: ['--tbl-expander-fg', '--tbl-subrow-bg'],
+    note: '펼침 아이콘, 토글 영역 배경, 뎁스별 음영. 단계당 tint를 한 번 더 섞습니다',
+    tokens: ['--tbl-expander-fg', '--tbl-subrow-bg', '--tbl-row-depth-tint', '--tbl-row-depth-step'],
   },
   {
     title: '드래그 순서 변경',

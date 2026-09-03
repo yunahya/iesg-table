@@ -150,6 +150,11 @@ export function Expansion() {
           행에는 같은 폭의 빈 자리가 들어가 정렬이 흐트러지지 않습니다.
         </>,
         <>
+          한 단계 내려갈 때마다 배경이 한 겹씩 진해집니다. <Code>--tbl-row-depth-tint</Code>가 섞는 색,{' '}
+          <Code>--tbl-row-depth-step</Code>이 단계당 비율입니다 — <Code>0%</Code>로 두면 음영이 꺼집니다. 단계별 토큰이
+          아니라 계산이라 깊이가 몇이든 알아서 이어집니다.
+        </>,
+        <>
           한 번에 다 펼치려면 <Code>expanded={'{true}'}</Code>를 넘기세요.
         </>,
       ]}
@@ -157,10 +162,10 @@ export function Expansion() {
         ['getSubRows', '(row) => TData[]', '뎁스 방식. 반환한 배열이 자식 행이 됩니다.'],
         ['renderSubRow', '(row) => ReactNode', '토글 방식. 행 아래 전체 폭 영역.'],
         ['expanded / onExpandedChange', 'ExpandedState', '펼침 상태. true면 전부 펼칩니다.'],
-        ['row.depth', 'number', '들여쓰기 단계. 화살표가 알아서 씁니다.'],
+        ['row.depth', 'number', '들여쓰기 단계이자 배경 음영 단계.'],
         ['labels.expandRow', 'string', '화살표 버튼의 접근성 이름.'],
       ]}
-      tokens={['--tbl-expander-fg', '--tbl-subrow-bg']}
+      tokens={['--tbl-expander-fg', '--tbl-subrow-bg', '--tbl-row-depth-tint', '--tbl-row-depth-step']}
       caveats={[
         <>
           <Code>renderSubRow</Code>는 가상화와 함께 쓸 수 없습니다 — 토글 영역이 &lsquo;행 하나당 인덱스 하나&rsquo;라는
@@ -199,7 +204,7 @@ export function Expansion() {
         />
         <Note>
           {mode === 'depth'
-            ? '4단계까지 내려갑니다: Scope → 배출원 → 연료 → 설비·사업장. 상위 행의 수치는 아래 행들의 합계입니다.'
+            ? '4단계까지 내려갑니다: Scope → 배출원 → 연료 → 설비·사업장. 내려갈수록 배경이 진해져 부모와 자식이 구분되고, 상위 행의 수치는 아래 행들의 합계입니다.'
             : '같은 데이터에 renderSubRow만 추가했습니다 — 펼치면 자식이 행으로 끼어드는 대신, 행 아래에 별도의 표가 열립니다.'}
         </Note>
       </div>
