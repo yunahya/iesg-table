@@ -31,6 +31,7 @@ export {
   type DataTableProps,
   type RowSelectionOptions,
   type TableComponents,
+  type RowDragApi,
   type TableLabels,
   type TablePaginationOptions,
   type VirtualOptions,
@@ -43,6 +44,28 @@ export {
   EXPANDER_COLUMN_ID,
   type ExpanderProps,
 } from './components/expander';
+
+/* Row drag reordering. */
+export {
+  RowDragHandle,
+  createRowDragColumn,
+  ROW_DRAG_COLUMN_ID,
+  type RowDragHandleProps,
+} from './components/row-drag';
+
+/* CSV export. `tableToMatrix` is the hand-off point for a real .xlsx writer. */
+export {
+  tableToCsv,
+  tableToMatrix,
+  downloadText,
+  exportTableToCsv,
+  type CsvOptions,
+  type DownloadOptions,
+  type ExportRowScope,
+} from './lib/export';
+
+/* Reorder helpers, exported for callers that persist their own order. */
+export { applyOrder, moveById } from './lib/reorder';
 
 /* Inline editing — use as a `cell` renderer with DataTable's `onCellEdit`. */
 export { EditableCell, type EditableCellProps } from './components/editable-cell';
@@ -60,13 +83,18 @@ export type {
   CellContext,
   ColumnDef,
   ColumnFiltersState,
+  ColumnOrderState,
   ColumnPinningState,
   ColumnResizeMode,
   ColumnSizingState,
   ExpandedState,
+  GroupingState,
   Header,
   OnChangeFn,
   Row,
   SortingState,
   VisibilityState,
 } from '@tanstack/react-table';
+
+/** The TanStack table instance — what `DataTable`'s `tableRef` holds. */
+export type { Table as TableInstance } from '@tanstack/react-table';

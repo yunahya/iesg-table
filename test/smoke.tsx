@@ -2,6 +2,7 @@
  * Render smoke test. Not a unit-test suite — it asserts the package mounts,
  * sorts, and selects without throwing, using react-dom/server.
  */
+import { createTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/react-table';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
   CHECKBOX_SIZE,
@@ -10,8 +11,12 @@ import {
   TableCell,
   TableCheckbox,
   type TableColumnDef,
+  applyOrder,
   createExpanderColumn,
+  createRowDragColumn,
   createSelectionColumn,
+  moveById,
+  tableToCsv,
 } from '../src/index';
 
 type Row = { id: string; name: string; amount: number };
@@ -425,5 +430,158 @@ const treeColumns: TableColumnDef<Node>[] = [
     ['editor styling is tokenised', html.includes('--tbl-edit-hover-bg')],
   ]);
 }
+
+// 18. row drag reordering
+{
+  const dragColumns: TableColumnDef<Row>[] = [createRowDragColumn<Row>(), ...columns.slice(1)];
+  const html = renderToStaticMarkup(
+    <DataTable
+      data={data}
+      columns={dragColumns}
+      getRowId={(r) => r.id}
+      labels={{ ...labels, dragRow: '순서 변경' }}
+      enableRowDragging
+    />,
+  );
+  // rowOrder is applied to the source array before TanStack sees it.
+  const reordered = renderToStaticMarkup(
+    <DataTable
+      data={data}
+      columns={dragColumns}
+      getRowId={(r) => r.id}
+      labels={labels}
+      enableRowDragging
+      rowOrder={['3', '1', '2']}
+    />,
+  );
+  const at = (name: string) => reordered.indexOf(name);
+  const [one, two, three] = [at('Scope 1'), at('Scope 2'), at('Scope 3')];
+  check('row drag reordering', html, [
+    ['one grip per row', (html.match(/순서 변경/g)?.length ?? 0) === 3],
+    ['grip is draggable', html.includes('draggable="true"')],
+    ['grip column is 40px', html.includes('width:40px')],
+    ['rowOrder reorders the rows', three < one && one < two],
+    [
+      'grip is excluded from a plain render',
+      !renderToStaticMarkup(
+        <DataTable data={data} columns={dragColumns} getRowId={(r) => r.id} labels={labels} />,
+      ).includes('draggable="true"'),
+    ],
+  ]);
+}
+
+// 19. column reordering
+{
+  const html = renderToStaticMarkup(
+    <DataTable
+      data={data}
+      columns={columns}
+      getRowId={(r) => r.id}
+      labels={labels}
+      enableColumnReordering
+      columnOrder={['select', 'amount', 'name']}
+    />,
+  );
+  check('column reordering', html, [
+    ['columnOrder swaps the headers', html.indexOf('tCO2eq') < html.indexOf('Category')],
+    ['colgroup follows the same order', html.includes('<col style="width:50px"/><col style="width:120px"/>')],
+    ['reorderable headers are draggable', html.includes('draggable="true"')],
+    [
+      'the selection column stays put',
+      !/draggable="true"[^>]*>\s*<div class="flex h-full w-full items-center justify-center"/.test(html),
+    ],
+  ]);
+}
+
+// 20. grouping and aggregation
+{
+  type GroupRow = { id: string; scope: string; site: string; amount: number };
+  const groupData: GroupRow[] = [
+    { id: '1', scope: 'Scope 1', site: '울산', amount: 100 },
+    { id: '2', scope: 'Scope 1', site: '여수', amount: 200 },
+    { id: '3', scope: 'Scope 2', site: '울산', amount: 50 },
+  ];
+  const groupColumns: TableColumnDef<GroupRow>[] = [
+    { accessorKey: 'scope', header: 'Scope', meta: { width: 200 } },
+    { accessorKey: 'site', header: 'Site', meta: { width: 140 } },
+    {
+      accessorKey: 'amount',
+      header: 'tCO2eq',
+      aggregationFn: 'sum',
+      meta: { numeric: true, width: 120 },
+      aggregatedCell: (ctx) => <b>{String(ctx.getValue())}</b>,
+    },
+  ];
+  const html = renderToStaticMarkup(
+    <DataTable
+      data={groupData}
+      columns={groupColumns}
+      getRowId={(r) => r.id}
+      labels={labels}
+      grouping={['scope']}
+      expanded={true}
+    />,
+  );
+  check('grouping and aggregation', html, [
+    ['group rows are tinted', html.includes('--tbl-group-row-bg')],
+    ['child counts are shown', html.includes('(2)') && html.includes('(1)')],
+    ['sum aggregation ran', html.includes('<b>300</b>')],
+    ['leaf rows are still rendered', html.includes('울산') && html.includes('여수')],
+  ]);
+}
+
+// 21. CSV export
+{
+  type CsvRow = { id: string; name: string; amount: number; note: string };
+  const csvData: CsvRow[] = [
+    { id: '1', name: 'Scope 1, direct', amount: 1200, note: 'says "hi"' },
+    { id: '2', name: '=1+1', amount: 340, note: 'line\nbreak' },
+  ];
+  const csvColumns: TableColumnDef<CsvRow>[] = [
+    createSelectionColumn<CsvRow>(),
+    { accessorKey: 'name', header: 'Category' },
+    { accessorKey: 'amount', header: 'tCO2eq' },
+    { accessorKey: 'note', header: 'Note', meta: { exportable: false } },
+  ];
+  const table = createTable<CsvRow>({
+    data: csvData,
+    columns: csvColumns,
+    getRowId: (r) => r.id,
+    state: {},
+    onStateChange: () => {},
+    renderFallbackValue: null,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+  table.setOptions((previous) => ({ ...previous, state: table.initialState }));
+
+  const csv = tableToCsv(table);
+  const lines = csv.split('\r\n');
+  check('CSV export', csv, [
+    ['header row uses the header text', lines[0] === 'Category,tCO2eq'],
+    ['display and opted-out columns are skipped', !csv.includes('Note') && !csv.includes('select')],
+    ['fields with a delimiter are quoted', lines[1] === '"Scope 1, direct",1200'],
+    ['formulas are neutralised', lines[2]?.startsWith("'=1+1") === true],
+    ['a tab delimiter produces a TSV', tableToCsv(table, { delimiter: '\t' }).split('\r\n')[0] === 'Category\ttCO2eq'],
+    ['headers can be turned off', tableToCsv(table, { header: false }).split('\r\n').length === 2],
+  ]);
+}
+
+// 22. reorder helpers — pure functions, no rendering needed
+check('reorder helpers', '', [
+  ['moves down', moveById(['a', 'b', 'c'], 'a', 'c', false).join('') === 'bac'],
+  ['moves down and after', moveById(['a', 'b', 'c'], 'a', 'c', true).join('') === 'bca'],
+  ['moves up', moveById(['a', 'b', 'c'], 'c', 'a', false).join('') === 'cab'],
+  ['ignores a self drop', moveById(['a', 'b'], 'a', 'a', true).join('') === 'ab'],
+  ['ignores unknown ids', moveById(['a', 'b'], 'z', 'a', true).join('') === 'ab'],
+  [
+    'applyOrder keeps unlisted items at the end',
+    applyOrder([{ id: 'a' }, { id: 'b' }, { id: 'c' }], ['c', 'a'], (item) => item.id)
+      .map((item) => item.id)
+      .join('') === 'cab',
+  ],
+  ['an empty order is a no-op', applyOrder([{ id: 'a' }], [], (i) => i.id)[0]?.id === 'a'],
+]);
 
 console.log('\nAll feature tests passed.');

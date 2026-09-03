@@ -138,6 +138,10 @@ Layout and cell behaviour are declared on the column, not at the call site.
 | `state` | `'default' \| 'selected' \| 'disabled'` | Usually derived automatically |
 | `tone` | `'none' \| 'muted' \| 'info' \| 'warning' \| 'danger'` | Semantic emphasis on resting cells |
 | `line` / `rightStroke` | `boolean` | Bottom / right border. Default `true` |
+| `reorderable` | `boolean` | Opt out of header drag reordering. Default `true` |
+| `exportable` | `boolean` | Drop the column from a CSV export |
+| `exportHeader` | `string` | Export header text when the rendered header is not a string |
+| `exportValue` | `(row) => unknown` | Export value when the cell shows something else |
 
 `CellType` is one of `text`, `number`, `unit`, `memo`, `checkbox`, `tag`, `text-tag`,
 `text-dropdown`, `text-button`, `button`, `icon`, `icon-text`, `switch`. It only controls padding and
@@ -220,7 +224,12 @@ pnpm install
 pnpm test          # render smoke tests (react-dom/server)
 pnpm check-types
 pnpm build
+pnpm dev           # playground at http://localhost:5273
 ```
+
+The playground has one page per feature in the left sidebar: a live example, what you can change
+about it, the props involved, the CSS variables it reads, and its limitations. `#/docs` is the
+reference page.
 
 ## Filtering and column visibility
 
@@ -311,10 +320,75 @@ const columns = [
 Click, Enter or F2 starts editing. Enter and blur commit; Escape reverts. A `number` input that does
 not parse reverts rather than committing `NaN`.
 
+## Row reordering
+
+```tsx
+import { createRowDragColumn } from '@iesg/table';
+
+const columns = [createRowDragColumn<Row>(), ...rest];
+
+<DataTable {...props} enableRowDragging rowOrder={order} onRowOrderChange={setOrder}
+  labels={{ ...labels, dragRow: 'reorder row' }} />
+```
+
+Drag the grip, or focus it and press the arrow keys. The order is applied to the source array before
+TanStack sorts or filters, so an active sort wins over it — turn sorting off on a screen where the
+user is arranging rows by hand. Ids missing from `rowOrder` keep their position at the end, so newly
+appended rows are never dropped.
+
+## Column reordering
+
+```tsx
+<DataTable {...props} enableColumnReordering columnOrder={order} onColumnOrderChange={setOrder} />
+```
+
+Header cells become draggable. The selection, expander and drag-grip columns are excluded because
+their position is structural, as are pinned columns; opt a column out with `meta.reorderable: false`.
+Clicking a header still sorts — a drag needs movement, so the two do not collide.
+
+## Grouping and aggregation
+
+```tsx
+const columns = [
+  { accessorKey: 'scope', header: 'Scope' },
+  { accessorKey: 'amount', header: 'tCO₂eq', aggregationFn: 'sum',
+    aggregatedCell: (ctx) => <b>{format(ctx.getValue())}</b> },
+];
+
+<DataTable {...props} grouping={['scope']} onGroupingChange={setGrouping} />
+```
+
+Group rows carry the expand toggle, the group value and the child count. Pass more than one column id
+to nest. `getSubRows` is ignored while grouping is on — grouping builds its own sub-rows.
+
+## CSV export
+
+```tsx
+import { exportTableToCsv, type TableInstance } from '@iesg/table';
+
+const tableRef = useRef<TableInstance<Row> | null>(null);
+
+<DataTable {...props} tableRef={tableRef} />
+<button onClick={() => exportTableToCsv(tableRef.current!, { fileName: 'emissions.csv' })}>Export</button>
+```
+
+The export follows the view: filters, sorting, column order and visibility all apply. `rows` picks the
+scope (`filtered` by default, or `all` / `selected` / `page`). A UTF-8 BOM is prepended so Excel reads
+Korean correctly, and values starting with `=` or `+` are prefixed with an apostrophe so Excel does
+not evaluate them as formulas (`sanitize: false` turns that off).
+
+Columns without an accessor are skipped. Use `meta.exportValue` when the cell renders something other
+than the raw value, `meta.exportHeader` when the header is not a plain string, and
+`meta.exportable: false` to drop a column entirely.
+
+There is no real `.xlsx` writer — that needs a zip implementation and a dependency this package does
+not want. `tableToMatrix()` returns `string[][]`, which is what SheetJS and exceljs take as input.
+
 ## Roadmap
 
-Not in 0.1: row drag reordering, column reordering, grouping and aggregation, and CSV/Excel export.
-All are reachable through TanStack's row models and feature API without forking anything.
+Not in 0.1: a native `.xlsx` writer, auto-scroll while dragging near the viewport edge, touch drag
+(the reorder uses HTML5 drag-and-drop, so use the arrow-key fallback on mobile), and combining
+virtualisation with `renderSubRow` panels.
 
 ## License
 

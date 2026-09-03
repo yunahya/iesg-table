@@ -105,14 +105,18 @@ const FEATURES: ReactNode[][] = [
   ['컬럼 고정', '좌/우 고정 + 경계 그림자. 오프셋 자동 계산', <Code key='k'>columnPinning</Code>],
   ['가상화', '수만 행에서 보이는 행만 렌더링', <Code key='k'>virtual</Code>],
   ['셀 인라인 편집', 'Enter/F2 시작, Enter·blur 확정, Escape 취소', <Code key='k'>onCellEdit</Code>],
+  ['행 순서 변경', '손잡이 드래그 + 방향키. 놓을 자리 표시선 포함', <Code key='k'>enableRowDragging</Code>],
+  ['컬럼 순서 변경', '헤더 드래그. 선택·확장·고정 컬럼은 자동 제외', <Code key='k'>enableColumnReordering</Code>],
+  ['그룹 · 집계', '다중 그룹 중첩, sum/mean/count 등 집계 셀', <Code key='k'>grouping</Code>],
+  ['CSV 내보내기', '화면 기준 직렬화, UTF-8 BOM, 수식 인젝션 방지', <Code key='k'>exportTableToCsv</Code>],
 ];
 
 const NOT_YET: ReactNode[][] = [
-  ['행 드래그 정렬', '드래그로 행 순서 바꾸기'],
-  ['컬럼 순서 변경', '드래그로 컬럼 재배치 (TanStack columnOrder)'],
-  ['그룹 / 집계', 'grouping + aggregation row model'],
-  ['CSV · Excel 내보내기', '—'],
-  ['가상화 + 커스텀 패널 동시 사용', '패널이 행-인덱스 매핑을 깨뜨립니다'],
+  ['진짜 .xlsx 파일 생성', 'zip 라이터가 필요합니다. tableToMatrix()를 SheetJS에 넘기세요'],
+  ['가상화 + renderSubRow 패널', '패널이 행-인덱스 매핑을 깨뜨립니다. 서브행 트리는 가능합니다'],
+  ['드래그 중 자동 스크롤', '긴 목록에서 화면 밖으로 끌 때 스크롤이 따라가지 않습니다'],
+  ['터치 드래그', 'HTML5 드래그앤드롭 기반이라 모바일에서는 방향키 이동을 쓰세요'],
+  ['다중 헤더 그룹 정렬', 'colSpan 헤더는 프리미티브로 직접 조합해야 합니다'],
 ];
 
 const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
@@ -206,6 +210,21 @@ const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
     title: '행 확장',
     note: '펼침 아이콘과 커스텀 패널 배경',
     tokens: ['--tbl-expander-fg', '--tbl-subrow-bg'],
+  },
+  {
+    title: '드래그 순서 변경',
+    note: '행 손잡이와, 놓을 자리를 알리는 표시선',
+    tokens: [
+      '--tbl-drag-handle-fg',
+      '--tbl-drag-handle-fg-hover',
+      '--tbl-drop-indicator',
+      '--tbl-drop-indicator-width',
+    ],
+  },
+  {
+    title: '그룹 · 집계',
+    note: '그룹 행의 배경과 하위 개수 표시',
+    tokens: ['--tbl-group-row-bg', '--tbl-group-row-fg', '--tbl-group-count-fg'],
   },
   {
     title: '인라인 편집',

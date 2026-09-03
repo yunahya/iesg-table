@@ -1,7 +1,7 @@
 import type { ColumnDef, RowData } from '@tanstack/react-table';
 import type { Align, CellState, CellTone, CellType, HeaderType } from './table';
 
-export interface TableColumnMeta {
+export interface TableColumnMeta<TData = unknown> {
   /** Alignment for body cells. Defaults to `right` when `numeric`, else `left`. */
   align?: Align;
   /** Alignment for the header cell. Defaults to `align`. */
@@ -28,6 +28,16 @@ export interface TableColumnMeta {
   rightStroke?: boolean;
   headerType?: HeaderType;
   headerLine?: boolean;
+  /** Opt this column out of drag reordering. Defaults to `true`. */
+  reorderable?: boolean;
+
+  /* export */
+  /** Exclude the column from CSV export. Display columns are excluded anyway. */
+  exportable?: boolean;
+  /** Header text for the export, when the rendered header is not a plain string. */
+  exportHeader?: string;
+  /** Value for the export, when the cell shows something other than the raw value. */
+  exportValue?: (row: TData) => unknown;
 }
 
 export interface TableCellEdit<TData = unknown> {
@@ -39,7 +49,7 @@ export interface TableCellEdit<TData = unknown> {
 
 declare module '@tanstack/react-table' {
   // TanStack's module augmentation requires the same generic parameters.
-  interface ColumnMeta<TData extends RowData, TValue> extends TableColumnMeta {}
+  interface ColumnMeta<TData extends RowData, TValue> extends TableColumnMeta<TData> {}
 
   interface TableMeta<TData extends RowData> {
     /** Set by `DataTable` from its `onCellEdit` prop; used by `EditableCell`. */

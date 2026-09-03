@@ -92,6 +92,17 @@
     --tbl-expander-fg: var(--tbl-cell-fg);
     --tbl-subrow-bg: var(--tbl-tone-muted-bg);
 
+    /* ---------- drag reordering ---------- */
+    --tbl-drag-handle-fg: #a7adb2;
+    --tbl-drag-handle-fg-hover: var(--tbl-cell-fg);
+    --tbl-drop-indicator: var(--tbl-sort-active);
+    --tbl-drop-indicator-width: 2px;
+
+    /* ---------- grouping ---------- */
+    --tbl-group-row-bg: #f2f4f6;
+    --tbl-group-row-fg: var(--tbl-cell-fg);
+    --tbl-group-count-fg: #7a8087;
+
     /* ---------- inline editing ---------- */
     --tbl-edit-bg: var(--tbl-cell-bg);
     --tbl-edit-fg: var(--tbl-cell-fg);
