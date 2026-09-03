@@ -23,6 +23,7 @@ const SIZE_TOKENS = [
   ['--tbl-cell-px', 'Cell padding X', 0, 32, 'px'],
   ['--tbl-cell-py', 'Cell padding Y', 0, 24, 'px'],
   ['--tbl-border-width', 'Border width', 0, 4, 'px'],
+  ['--tbl-row-depth-step', 'Depth shading', 0, 30, '%'],
   ['--tbl-radius', 'Corner radius', 0, 24, 'px'],
 ] as const;
 
