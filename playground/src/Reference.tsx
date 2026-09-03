@@ -345,13 +345,6 @@ const FEATURES: ReactNode[][] = [
   ],
 ];
 
-const NOT_YET: ReactNode[][] = [
-  ['진짜 .xlsx 파일 생성', 'zip 라이터가 필요합니다. tableToMatrix()를 SheetJS·exceljs에 넘기세요'],
-  ['가상화 + 테이블 토글', '토글 영역이 행-인덱스 매핑을 깨뜨립니다. 뎁스 있는 테이블은 가능합니다'],
-  ['드래그 중 자동 스크롤', '긴 목록에서 화면 밖으로 끌 때 스크롤이 따라가지 않습니다'],
-  ['터치 드래그', 'HTML5 드래그앤드롭 기반이라 모바일에서는 방향키 이동을 쓰세요'],
-  ['다중 헤더 그룹 정렬', 'colSpan 헤더는 프리미티브로 직접 조합해야 합니다'],
-];
 
 const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
   {
@@ -542,9 +535,7 @@ export function Reference() {
         <Rows head={['기능', '설명', 'API', '어디서 오는가']} rows={FEATURES} />
       </Card>
 
-      <Card title='아직 없는 기능' subtitle='숨기지 않고 적어 둡니다. 대부분 우회 방법이 있습니다.'>
-        <Rows head={['기능', '비고']} rows={NOT_YET} />
-      </Card>
+
 
       {/* 커스터마이징 */}
       <Card title='커스터마이징은 어디까지 되나' subtitle='아래로 갈수록 자유도가 높고, 손이 더 많이 갑니다.'>
