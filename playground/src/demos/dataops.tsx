@@ -7,10 +7,12 @@ import {
   type TableColumnDef,
   type TableInstance,
   type VisibilityState,
+  clearPersistedState,
   createRowDragColumn,
   createSelectionColumn,
   exportTableToCsv,
   tableToCsv,
+  usePersistedState,
 } from '../../../src/index';
 import { baseColumns } from '../columns';
 import { type Emission, emissions, labels, num } from '../data';
@@ -248,8 +250,11 @@ export function RowReorder() {
 /* 컬럼 순서 변경                                                       */
 /* ------------------------------------------------------------------ */
 
+const ORDER_KEY = 'iesg-table.demo.columnOrder';
+
 export function ColumnReorder() {
-  const [order, setOrder] = useState<ColumnOrderState>([]);
+  // Persisting is opt-in and lives outside the table: one hook, one key.
+  const [order, setOrder] = usePersistedState<ColumnOrderState>(ORDER_KEY, []);
   const [selected, setSelected] = useState<string[]>([]);
   const columns = useMemo<TableColumnDef<Emission>[]>(
     () => [createSelectionColumn<Emission>(), ...baseColumns.slice(0, 5)],
@@ -259,13 +264,23 @@ export function ColumnReorder() {
   return (
     <DemoPage
       title='컬럼 순서 변경'
-      summary='헤더를 잡아 끌면 컬럼 순서가 바뀝니다. 놓을 쪽 모서리에 세로선이 표시됩니다. 헤더를 그냥 클릭하면 평소대로 정렬됩니다 — 드래그와 클릭이 서로 방해하지 않습니다.'
+      summary={
+        <>
+          헤더를 잡아 끌면 컬럼 순서가 바뀝니다. 놓을 쪽 모서리에 세로선이 표시됩니다. 헤더를 그냥 클릭하면 평소대로
+          정렬됩니다 — 드래그와 클릭이 서로 방해하지 않습니다.{' '}
+          <strong>이 예제는 순서를 localStorage에 저장합니다</strong> — 새로고침해도 그대로입니다.
+        </>
+      }
       customization={[
         '선택 컬럼·확장 컬럼·드래그 손잡이 컬럼은 구조상 자리가 고정이라 대상에서 자동으로 빠집니다.',
         <>
           개별 컬럼을 빼려면 <Code>meta.reorderable: false</Code>를 주세요.
         </>,
         '고정(pinned)된 컬럼도 자동으로 제외됩니다.',
+        <>
+          저장은 <Code>usePersistedState</Code> 훅으로 합니다. 컬럼 폭·표시 여부·정렬 등 다른 제어 상태에도 똑같이
+          씁니다. 테이블이 스스로 저장소에 쓰지는 않습니다 — 키 이름과 저장 여부는 여러분이 정합니다.
+        </>,
         <>
           표시선 색은 행 드래그와 같은 <Code>--tbl-drop-indicator</Code>를 씁니다.
         </>,
@@ -274,14 +289,32 @@ export function ColumnReorder() {
         ['enableColumnReordering', 'boolean', '헤더 드래그를 켭니다.'],
         ['columnOrder / onColumnOrderChange', 'ColumnOrderState', '컬럼 id 배열.'],
         ['meta.reorderable', 'boolean', '컬럼 단위 예외.'],
+        ['usePersistedState(key, initial)', '[T, OnChangeFn<T>]', 'localStorage에 저장되는 제어 상태.'],
+        ['clearPersistedState(key)', 'void', '저장된 값을 지웁니다.'],
+      ]}
+      caveats={[
+        <>
+          저장된 값에는 컬럼 <strong>id</strong>가 들어갑니다. 컬럼을 추가·삭제하면 옛 값이 남아 이상하게 보일 수
+          있으니, 그럴 때는 <Code>version</Code> 옵션을 올려 예전 항목을 무시하게 하세요.
+        </>,
       ]}
     >
       <div className='space-y-3'>
-        <div className='flex items-center gap-2'>
-          <button type='button' className={btn} onClick={() => setOrder([])} disabled={order.length === 0}>
-            원래 순서로
+        <div className='flex flex-wrap items-center gap-2'>
+          <button
+            type='button'
+            className={btn}
+            onClick={() => {
+              clearPersistedState(ORDER_KEY);
+              setOrder([]);
+            }}
+            disabled={order.length === 0}
+          >
+            원래 순서로 (저장분도 삭제)
           </button>
-          <span className='text-slate-500 text-xs'>헤더를 잡고 좌우로 끌어보세요</span>
+          <span className='text-slate-500 text-xs'>
+            헤더를 잡고 좌우로 끌어본 다음, 새로고침해보세요 — 순서가 유지됩니다.
+          </span>
         </div>
         <DataTable
           data={emissions.slice(0, 5)}

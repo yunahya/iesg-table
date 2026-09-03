@@ -67,6 +67,17 @@ export {
 /* Reorder helpers, exported for callers that persist their own order. */
 export { applyOrder, moveById } from './lib/reorder';
 
+/* Opt-in persistence for any controlled table state (column order, sizing, …). */
+export { usePersistedState, clearPersistedState, type PersistOptions } from './lib/persist';
+
+/* Spreadsheet-style keyboard movement between editable cells. */
+export {
+  focusNeighbour,
+  directionForKey,
+  CELL_NAV_ATTR,
+  type NavDirection,
+} from './lib/grid-nav';
+
 /* Inline editing — use as a `cell` renderer with DataTable's `onCellEdit`. */
 export { EditableCell, type EditableCellProps } from './components/editable-cell';
 

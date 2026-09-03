@@ -15,8 +15,10 @@ import {
   createExpanderColumn,
   createRowDragColumn,
   createSelectionColumn,
+  directionForKey,
   moveById,
   tableToCsv,
+  usePersistedState,
 } from '../src/index';
 
 type Row = { id: string; name: string; amount: number };
@@ -583,5 +585,68 @@ check('reorder helpers', '', [
   ],
   ['an empty order is a no-op', applyOrder([{ id: 'a' }], [], (i) => i.id)[0]?.id === 'a'],
 ]);
+
+// 23. editable cells join the keyboard grid
+{
+  const editColumns: TableColumnDef<Row>[] = [
+    { accessorKey: 'name', header: 'Name', meta: { width: 200 }, cell: (ctx) => <EditableCell ctx={ctx} /> },
+    {
+      accessorKey: 'amount',
+      header: 'Amount',
+      meta: { numeric: true, width: 120 },
+      cell: (ctx) => <EditableCell ctx={ctx} gridNavigation={false} />,
+    },
+  ];
+  const html = renderToStaticMarkup(
+    <DataTable data={data} columns={editColumns} getRowId={(r) => r.id} labels={labels} onCellEdit={() => {}} />,
+  );
+  check('editable cell keyboard grid', html, [
+    ['navigable cells are marked', (html.match(/data-tbl-cell-nav/g)?.length ?? 0) === 3],
+    ['gridNavigation=false opts out', (html.match(/data-tbl-cell-nav/g)?.length ?? 0) < 6],
+    ['still renders a value, not an input', !html.includes('<input')],
+  ]);
+}
+
+// 24. direction mapping — pure function
+check('key to direction', '', [
+  ['arrows map through', directionForKey('ArrowUp', false) === 'up' && directionForKey('ArrowDown', false) === 'down'],
+  ['tab goes right', directionForKey('Tab', false) === 'right'],
+  ['shift+tab goes left', directionForKey('Tab', true) === 'left'],
+  ['other keys are not moves', directionForKey('a', false) === null && directionForKey('Enter', false) === null],
+]);
+
+// 25. persisted state reads what was stored
+{
+  const makeStorage = (seed: Record<string, string>): Storage => {
+    const map = new Map(Object.entries(seed));
+    return {
+      get length() {
+        return map.size;
+      },
+      clear: () => map.clear(),
+      getItem: (key: string) => map.get(key) ?? null,
+      key: (index: number) => [...map.keys()][index] ?? null,
+      removeItem: (key: string) => map.delete(key) as unknown as void,
+      setItem: (key: string, value: string) => void map.set(key, value),
+    };
+  };
+
+  function Probe({ storage, version }: { storage: Storage; version?: number }) {
+    const [value] = usePersistedState<string[]>('order', ['fallback'], { storage, version });
+    return <i>{value.join(',')}</i>;
+  }
+
+  const stored = makeStorage({ order: JSON.stringify({ v: 1, value: ['b', 'a'] }) });
+  const corrupt = makeStorage({ order: 'not json' });
+  check('persisted state', '', [
+    ['restores the stored value', renderToStaticMarkup(<Probe storage={stored} />).includes('b,a')],
+    [
+      'a version bump ignores the old entry',
+      renderToStaticMarkup(<Probe storage={stored} version={2} />).includes('fallback'),
+    ],
+    ['corrupt entries fall back', renderToStaticMarkup(<Probe storage={corrupt} />).includes('fallback')],
+    ['an empty store falls back', renderToStaticMarkup(<Probe storage={makeStorage({})} />).includes('fallback')],
+  ]);
+}
 
 console.log('\nAll feature tests passed.');

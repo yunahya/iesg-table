@@ -59,14 +59,22 @@ export function InlineEditing() {
       title='인라인 편집'
       summary={
         <>
-          셀을 클릭하거나 포커스 후 <Code>Enter</Code> / <Code>F2</Code>로 편집을 시작합니다. <Code>Enter</Code>와
-          포커스 해제로 확정, <Code>Escape</Code>로 취소합니다.
+          셀을 클릭하거나, 포커스한 뒤 <Code>Enter</Code> · <Code>F2</Code>를 누르거나, 그냥 글자를 치면 편집이
+          시작됩니다. <Code>↑↓←→</Code>와 <Code>Tab</Code>으로 셀 사이를 옮겨 다닐 수 있어 마우스 없이 한 열을 쭉 채울
+          수 있습니다.
         </>
       }
       customization={[
         <>
           <Code>EditableCell</Code>은 기본 제공일 뿐입니다. <Code>onCellEdit</Code>만 받아 처리하면 입력 UI는 얼마든지
           직접 만들어도 됩니다.
+        </>,
+        <>
+          키보드 이동이 방해가 되면 <Code>gridNavigation={'{false}'}</Code>로 끕니다. 그러면 <Code>Tab</Code>은 브라우저
+          기본 순서를, <Code>←→</Code>는 캐럿 이동만 하게 됩니다.
+        </>,
+        <>
+          여러분이 만든 셀 컴포넌트도 <Code>CELL_NAV_ATTR</Code>을 펼쳐 넣으면 같은 이동 대상에 포함됩니다.
         </>,
         <>
           <Code>validate</Code>로 확정 전에 값을 거를 수 있고, 통과하지 못하면 원래 값으로 되돌아갑니다.
@@ -83,6 +91,8 @@ export function InlineEditing() {
         ['EditableCell.inputType', "'text' | 'number'", 'number면 숫자로 확정합니다.'],
         ['EditableCell.validate', '(value) => boolean', '거절되면 되돌립니다.'],
         ['EditableCell.format', '(value) => string', '보기 전용 표시 형식.'],
+        ['EditableCell.gridNavigation', 'boolean', '기본 true. 방향키·Tab 이동.'],
+        ['CELL_NAV_ATTR', 'object', '직접 만든 셀 컨트롤을 이동 대상에 넣는 속성.'],
       ]}
       tokens={['--tbl-edit-bg', '--tbl-edit-fg', '--tbl-edit-border', '--tbl-edit-hover-bg']}
       caveats={[
@@ -103,7 +113,12 @@ export function InlineEditing() {
             setLog((prev) => [`${rowId}.${columnId} → ${JSON.stringify(value)}`, ...prev].slice(0, 4));
           }}
         />
-        <Note>숫자 컬럼에 글자를 넣고 Enter를 눌러보세요 — 되돌아갑니다.</Note>
+        <Note>
+          셀 하나에 포커스를 준 뒤 <Code>↓</Code>로 내려가며 값을 바로 타이핑해보세요. <Code>Enter</Code>는 확정 후
+          아래로, <Code>Tab</Code>은 확정 후 오른쪽으로, <Code>Escape</Code>는 취소입니다. 편집 중 <Code>←→</Code>는
+          글자 사이를 움직이다가 끝에 닿으면 옆 셀로 넘어갑니다. 숫자 컬럼에 글자를 넣고 <Code>Enter</Code>를 누르면
+          되돌아갑니다.
+        </Note>
         {log.length > 0 && (
           <pre className='rounded border border-slate-200 bg-slate-50 p-2 font-mono text-[11px] text-slate-700'>
             {log.join('\n')}

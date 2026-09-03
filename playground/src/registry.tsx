@@ -1,9 +1,10 @@
 import type { ComponentType } from 'react';
 import { Reference } from './Reference';
-import { CellTypes, Overview, Pagination, Selection, Sorting, StatesAndTones, StatusStates } from './demos/basics';
+import { CellTypes, Pagination, Selection, Sorting, StatesAndTones, StatusStates } from './demos/basics';
 import { ComponentSlots, HandComposed, InlineEditing } from './demos/custom';
 import { ColumnReorder, ColumnVisibility, Export, Filtering, Grouping, RowReorder } from './demos/dataops';
 import { Expansion, Resizing, StickyAndPinning, Virtualised } from './demos/layout';
+import { Overview } from './demos/overview';
 
 export interface Entry {
   /** Hash route without the leading `#/`. The empty string is the landing page. */

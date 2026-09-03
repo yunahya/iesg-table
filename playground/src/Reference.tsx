@@ -79,40 +79,264 @@ const NO = <span className='text-slate-400'>불가</span>;
 /* 내용                                                                */
 /* ------------------------------------------------------------------ */
 
+/** Where a feature's logic actually comes from. */
+function Origin({ kind }: { kind: 'tanstack' | 'own' | 'mixed' }) {
+  const [className, text] = {
+    tanstack: ['bg-sky-100 text-sky-800', 'TanStack'],
+    own: ['bg-violet-100 text-violet-800', '직접 구현'],
+    mixed: ['bg-slate-200 text-slate-700', '혼합'],
+  }[kind];
+  return <span className={`mr-1 rounded px-1.5 py-0.5 font-medium text-[10px] ${className}`}>{text}</span>;
+}
+
+/** 기능 | 설명 | API | 로직의 출처와 구현 방식 */
 const FEATURES: ReactNode[][] = [
-  ['정렬', '클라이언트 정렬, 서버 정렬(manualSorting), 제어/비제어 모두', <Code key='k'>sorting</Code>],
-  ['행 선택', '단일·다중, 부분선택(indeterminate), 페이지 범위 / 전체 범위', <Code key='k'>rowSelection</Code>],
-  ['페이지네이션', '내장 컴포넌트 또는 직접 배치. 페이지 크기 선택 포함', <Code key='k'>pagination</Code>],
-  ['로딩 / 빈 상태', 'aria-live로 안내되는 전용 행', <Code key='k'>loading</Code>],
-  ['행 비활성화', '클릭·선택 차단 + 전용 색상', <Code key='k'>getRowDisabled</Code>],
-  ['행 클릭', '마우스 + 키보드(Enter/Space). 내부 컨트롤 이벤트는 무시', <Code key='k'>onRowClick</Code>],
+  [
+    '정렬',
+    '클라이언트 정렬, 서버 정렬(manualSorting), 제어/비제어 모두',
+    <Code key='k'>sorting</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      계산은 <Code>getSortedRowModel</Code>, 헤더 버튼·아이콘·<Code>aria-sort</Code>는 직접
+    </span>,
+  ],
+  [
+    '행 선택',
+    '단일·다중, 부분선택(indeterminate), 페이지 범위 / 전체 범위',
+    <Code key='k'>rowSelection</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      TanStack <Code>rowSelection</Code> 상태를 id 배열 API로 감싸고, 전체 범위 선택은 직접
+    </span>,
+  ],
+  [
+    '페이지네이션',
+    '내장 컴포넌트 또는 직접 배치. 페이지 크기 선택 포함',
+    <Code key='k'>pagination</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      서버 기준이라 TanStack 페이지 행 모델을 쓰지 않습니다. 번호·생략(…) 계산도 직접
+    </span>,
+  ],
+  [
+    '로딩 / 빈 상태',
+    'aria-live로 안내되는 전용 행',
+    <Code key='k'>loading</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      colSpan 한 칸짜리 상태 행
+    </span>,
+  ],
+  [
+    '행 비활성화',
+    '클릭·선택 차단 + 전용 색상',
+    <Code key='k'>getRowDisabled</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      선택 차단은 <Code>enableRowSelection</Code> 콜백, 클릭 차단과 색은 직접
+    </span>,
+  ],
+  [
+    '행 클릭',
+    '마우스 + 키보드(Enter/Space). 내부 컨트롤 이벤트는 무시',
+    <Code key='k'>onRowClick</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      <Code>event.target !== currentTarget</Code>로 셀 안 버튼의 키 입력을 걸러냅니다
+    </span>,
+  ],
   [
     '셀 타입 13종',
     'text, number, unit, memo, checkbox, tag, text-tag, text-dropdown, text-button, button, icon, icon-text, switch',
     <Code key='k'>meta.type</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      타입별 패딩·정렬 클래스 매핑. TanStack은 렌더링에 관여하지 않습니다
+    </span>,
   ],
-  ['셀 톤 5종', 'none, muted, info, warning, danger — 의미 기반 강조', <Code key='k'>meta.tone</Code>],
-  ['행 헤더 컬럼', '<th scope="row">로 렌더링', <Code key='k'>meta.rowHeader</Code>],
-  ['컬럼 폭 고정', 'colgroup으로 확정. 균등 분할되지 않음', <Code key='k'>meta.width</Code>],
-  ['말줄임', '컬럼별 on/off', <Code key='k'>meta.truncate</Code>],
-  ['다국어', '문구 하드코딩 0개. labels가 필수 prop', <Code key='k'>labels</Code>],
-  ['접근성', 'aria-sort, scope, aria-selected/disabled/busy, 포커스 링', '—'],
-  ['전역 검색 / 컬럼 필터', '클라이언트 필터, 서버 필터(manualFiltering)', <Code key='k'>globalFilter</Code>],
-  ['컬럼 표시 토글', '숨긴 컬럼은 colgroup에서도 함께 빠집니다', <Code key='k'>columnVisibility</Code>],
-  ['행 확장 · 서브행', '트리(getSubRows) 또는 전체 폭 커스텀 패널(renderSubRow)', <Code key='k'>expanded</Code>],
-  ['컬럼 리사이징', '헤더 끝 드래그. onChange / onEnd 모드', <Code key='k'>enableColumnResizing</Code>],
-  ['sticky 헤더', '세로 스크롤 시 헤더 고정', <Code key='k'>stickyHeader</Code>],
-  ['컬럼 고정', '좌/우 고정 + 경계 그림자. 오프셋 자동 계산', <Code key='k'>columnPinning</Code>],
-  ['가상화', '수만 행에서 보이는 행만 렌더링', <Code key='k'>virtual</Code>],
-  ['셀 인라인 편집', 'Enter/F2 시작, Enter·blur 확정, Escape 취소', <Code key='k'>onCellEdit</Code>],
-  ['행 순서 변경', '손잡이 드래그 + 방향키. 놓을 자리 표시선 포함', <Code key='k'>enableRowDragging</Code>],
-  ['컬럼 순서 변경', '헤더 드래그. 선택·확장·고정 컬럼은 자동 제외', <Code key='k'>enableColumnReordering</Code>],
-  ['그룹 · 집계', '다중 그룹 중첩, sum/mean/count 등 집계 셀', <Code key='k'>grouping</Code>],
-  ['CSV 내보내기', '화면 기준 직렬화, UTF-8 BOM, 수식 인젝션 방지', <Code key='k'>exportTableToCsv</Code>],
+  [
+    '셀 톤 5종',
+    'none, muted, info, warning, danger — 의미 기반 강조',
+    <Code key='k'>meta.tone</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      state가 설정되면 tone을 덮는 우선순위 규칙까지 직접
+    </span>,
+  ],
+  [
+    '행 헤더 컬럼',
+    'th scope="row" 로 렌더링',
+    <Code key='k'>meta.rowHeader</Code>,
+    <span key='o'>
+      <Origin kind='own' />셀 렌더러에서 태그만 바꿉니다
+    </span>,
+  ],
+  [
+    '컬럼 폭 고정',
+    'colgroup으로 확정. 균등 분할되지 않음',
+    <Code key='k'>meta.width</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      <Code>meta.width</Code>를 TanStack 컬럼 사이징에 주입하고, 실제 폭은 <Code>&lt;colgroup&gt;</Code>으로 내보냅니다
+    </span>,
+  ],
+  [
+    '말줄임',
+    '컬럼별 on/off',
+    <Code key='k'>meta.truncate</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      말줄임을 셀이 아니라 글자를 든 내부 요소에 겁니다 — 셀에 걸면 잘리기만 하고 … 이 안 나옵니다
+    </span>,
+  ],
+  [
+    '다국어',
+    '문구 하드코딩 0개. labels가 필수 prop',
+    <Code key='k'>labels</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      필수 prop이라 빠뜨릴 수 없습니다
+    </span>,
+  ],
+  [
+    '접근성',
+    'aria-sort, scope, aria-selected/disabled/busy, 포커스 링',
+    '—',
+    <span key='o'>
+      <Origin kind='own' />
+      마크업이 이 패키지 몫이므로 전부 직접
+    </span>,
+  ],
+  [
+    '전역 검색 / 컬럼 필터',
+    '클라이언트 필터, 서버 필터(manualFiltering)',
+    <Code key='k'>globalFilter</Code>,
+    <span key='o'>
+      <Origin kind='tanstack' />
+      <Code>getFilteredRowModel</Code> 그대로. 검색창 UI는 제공하지 않습니다
+    </span>,
+  ],
+  [
+    '컬럼 표시 토글',
+    '숨긴 컬럼은 colgroup에서도 함께 빠집니다',
+    <Code key='k'>columnVisibility</Code>,
+    <span key='o'>
+      <Origin kind='tanstack' />
+      상태는 그대로 쓰고, colgroup 동기화만 직접
+    </span>,
+  ],
+  [
+    '행 확장 · 서브행',
+    '트리(getSubRows) 또는 전체 폭 커스텀 패널(renderSubRow)',
+    <Code key='k'>expanded</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      트리는 <Code>getExpandedRowModel</Code>, 패널 행과 화살표 컬럼은 직접
+    </span>,
+  ],
+  [
+    '컬럼 리사이징',
+    '헤더 끝 드래그. onChange / onEnd 모드',
+    <Code key='k'>enableColumnResizing</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      계산은 <Code>getResizeHandler</Code>, 손잡이 DOM과 커서는 직접
+    </span>,
+  ],
+  [
+    'sticky 헤더',
+    '세로 스크롤 시 헤더 고정',
+    <Code key='k'>stickyHeader</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      순수 CSS <Code>position: sticky</Code>. 이걸 위해 테이블을 <Code>border-separate</Code>로 씁니다
+    </span>,
+  ],
+  [
+    '컬럼 고정',
+    '좌/우 고정 + 경계 그림자. 오프셋 자동 계산',
+    <Code key='k'>columnPinning</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      오프셋은 <Code>getStart</Code> / <Code>getAfter</Code>, sticky 배치와 그림자는 직접
+    </span>,
+  ],
+  [
+    '가상화',
+    '수만 행에서 보이는 행만 렌더링',
+    <Code key='k'>virtual</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      엔진은 별도 패키지 <Code>@tanstack/react-virtual</Code>, 스페이서 행 기법은 직접
+    </span>,
+  ],
+  [
+    '셀 인라인 편집',
+    '포커스되면 바로 편집. Enter·blur 확정, Escape 취소',
+    <Code key='k'>onCellEdit</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      TanStack에는 편집 기능이 없습니다. <Code>table.options.meta</Code>를 통로로만 씁니다
+    </span>,
+  ],
+  [
+    '편집 셀 키보드 이동',
+    '↑↓←→ 와 Tab 으로 셀 사이 이동. 이동만 해도 편집 상태가 됩니다',
+    <Code key='k'>gridNavigation</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      렌더된 DOM의 <Code>cellIndex</Code>를 훑어 이동합니다 — 가상화·숨김·순서 변경과 무관하게 동작합니다
+    </span>,
+  ],
+  [
+    '행 순서 변경',
+    '손잡이 드래그 + 방향키. 놓을 자리 표시선 포함',
+    <Code key='k'>enableRowDragging</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      TanStack에 행 순서 상태가 없습니다. HTML5 드래그앤드롭 + 원본 배열 재정렬로 구현
+    </span>,
+  ],
+  [
+    '컬럼 순서 변경',
+    '헤더 드래그. 선택·확장·고정 컬럼은 자동 제외',
+    <Code key='k'>enableColumnReordering</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      상태는 TanStack <Code>columnOrder</Code>, 드래그 상호작용과 표시선은 직접
+    </span>,
+  ],
+  [
+    '그룹 · 집계',
+    '다중 그룹 중첩, sum/mean/count 등 집계 셀',
+    <Code key='k'>grouping</Code>,
+    <span key='o'>
+      <Origin kind='mixed' />
+      <Code>getGroupedRowModel</Code>과 집계 함수는 TanStack, 그룹 행 렌더링은 직접
+    </span>,
+  ],
+  [
+    'CSV 내보내기',
+    '화면 기준 직렬화, UTF-8 BOM, 수식 인젝션 방지',
+    <Code key='k'>exportTableToCsv</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      TanStack 행 모델에서 값만 읽습니다. RFC 4180 이스케이프도 직접
+    </span>,
+  ],
+  [
+    '상태 저장',
+    '컬럼 순서·폭·표시 여부를 새로고침 후에도 유지',
+    <Code key='k'>usePersistedState</Code>,
+    <span key='o'>
+      <Origin kind='own' />
+      선택 사항인 훅 하나. 테이블이 스스로 저장소에 쓰지 않습니다
+    </span>,
+  ],
 ];
 
 const NOT_YET: ReactNode[][] = [
-  ['진짜 .xlsx 파일 생성', 'zip 라이터가 필요합니다. tableToMatrix()를 SheetJS에 넘기세요'],
+  ['진짜 .xlsx 파일 생성', 'zip 라이터가 필요합니다. tableToMatrix()를 SheetJS·exceljs에 넘기세요'],
   ['가상화 + renderSubRow 패널', '패널이 행-인덱스 매핑을 깨뜨립니다. 서브행 트리는 가능합니다'],
   ['드래그 중 자동 스크롤', '긴 목록에서 화면 밖으로 끌 때 스크롤이 따라가지 않습니다'],
   ['터치 드래그', 'HTML5 드래그앤드롭 기반이라 모바일에서는 방향키 이동을 쓰세요'],
@@ -290,14 +514,14 @@ export function Reference() {
       </Card>
 
       {/* 기능 */}
-      <Card title='제공하는 기능' subtitle='현재 0.1.0 기준으로 동작하는 것들입니다.'>
-        <Rows head={['기능', '설명', 'API']} rows={FEATURES} />
+      <Card
+        title='제공하는 기능'
+        subtitle='현재 0.1.0 기준으로 동작하는 것들입니다. 마지막 칸은 그 기능의 로직이 TanStack에서 오는지, 이 패키지가 직접 만든 것인지를 나눕니다.'
+      >
+        <Rows head={['기능', '설명', 'API', '어디서 오는가']} rows={FEATURES} />
       </Card>
 
-      <Card
-        title='아직 없는 기능'
-        subtitle='전부 TanStack의 row model / feature API로 붙일 수 있습니다. 포크는 필요 없습니다.'
-      >
+      <Card title='아직 없는 기능' subtitle='숨기지 않고 적어 둡니다. 대부분 우회 방법이 있습니다.'>
         <Rows head={['기능', '비고']} rows={NOT_YET} />
       </Card>
 

@@ -317,8 +317,48 @@ const columns = [
 <DataTable {...props} onCellEdit={({ rowId, columnId, value }) => save(rowId, columnId, value)} />
 ```
 
-Click, Enter or F2 starts editing. Enter and blur commit; Escape reverts. A `number` input that does
-not parse reverts rather than committing `NaN`.
+A cell becomes an input as soon as it takes focus — by click, by Tab, or by an arrow key — so moving
+into a cell and typing just works. Enter and blur commit; Escape reverts and leaves focus on the cell
+without reopening the editor. A `number` input that does not parse reverts rather than committing
+`NaN`.
+
+Arrow keys and Tab move between editable cells:
+
+| Key | While editing | Resting on a cell |
+| --- | --- | --- |
+| `↑` / `↓` | Commit, move up / down | Move up / down |
+| `←` / `→` | Move the caret; at the end of the text, move to the next cell | Move left / right |
+| `Tab` / `Shift+Tab` | Commit, move right / left | Move right / left |
+| `Enter` | Commit, move down | Open the editor |
+| `Escape` | Revert, stay on the cell | — |
+
+Movement walks the rendered DOM, so hidden columns, reordered columns and virtualised rows all work
+without extra bookkeeping, and rows with nothing editable in that column are skipped. Turn either
+behaviour off per cell with `editOnFocus={false}` or `gridNavigation={false}`. Spread `CELL_NAV_ATTR`
+onto your own cell control to include it in the same grid.
+
+## Persisting table state
+
+```tsx
+import { usePersistedState, clearPersistedState, type ColumnOrderState } from '@iesg/table';
+
+const [order, setOrder] = usePersistedState<ColumnOrderState>('emissions.columnOrder', []);
+
+<DataTable {...props} enableColumnReordering columnOrder={order} onColumnOrderChange={setOrder} />
+```
+
+The table never writes to storage on its own — persistence is a hook you opt into, so the key naming
+stays yours and nothing is stored behind a user's back. It works for any controlled state: column
+order, sizing, visibility, pinning, sorting.
+
+Storage failures are not errors: server rendering, private mode, blocked site data and an exceeded
+quota all fall back to in-memory state. A corrupt or hand-edited entry falls back to the initial
+value rather than reaching the component.
+
+Stored values contain column ids, so a schema change can leave a stale entry behind. Bump `version`
+to have old entries ignored: `usePersistedState(key, initial, { version: 2 })`. Pass
+`{ storage: sessionStorage }` for per-tab state, and `clearPersistedState(key)` behind a "reset
+layout" control.
 
 ## Row reordering
 
