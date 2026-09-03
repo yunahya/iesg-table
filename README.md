@@ -276,6 +276,22 @@ The playground has one page per feature in the left sidebar: a live example, wha
 about it, the props involved, the CSS variables it reads, and its limitations. `#/docs` is the
 reference page.
 
+## Loading and empty states
+
+```tsx
+<DataTable {...props} loading={isFetching} loadingRowCount={pageSize} />
+```
+
+Loading does not blank the table. The header stays sharp, stand-in rows are drawn with the real
+columns and blurred, and a spinner sits on top — so the column widths and row height are already the
+ones the data will land in and nothing jumps when it arrives. The stand-in rows are `aria-hidden`;
+the spinner carries `labels.loading` in an `<output aria-live="polite">`, and the table is
+`aria-busy`.
+
+`--tbl-loading-blur` (set it to `0` to switch the blur off), `--tbl-loading-overlay-bg`,
+`--tbl-skeleton-bg`, `--tbl-spinner-track` and `--tbl-spinner-indicator` cover the appearance. For a
+completely different treatment, leave `loading` unset and render your own.
+
 ## Filtering and column visibility
 
 ```tsx

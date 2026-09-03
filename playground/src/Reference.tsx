@@ -120,7 +120,7 @@ const FEATURES: ReactNode[][] = [
   ],
   [
     '로딩 / 빈 상태',
-    'aria-live로 안내되는 전용 행',
+    '로딩은 헤더 + 흐린 대체 행 + 스피너, 빈 상태는 전용 행. 둘 다 aria-live로 안내',
     <Code key='k'>loading</Code>,
     <span key='o'>
       <Origin kind='own' />
@@ -464,6 +464,17 @@ const TOKEN_GROUPS: { title: string; note: string; tokens: string[] }[] = [
     title: '인라인 편집',
     note: '편집 중 입력창과 편집 가능 셀의 호버',
     tokens: ['--tbl-edit-bg', '--tbl-edit-fg', '--tbl-edit-border', '--tbl-edit-hover-bg'],
+  },
+  {
+    title: '로딩',
+    note: '헤더는 그대로 두고, 대체 행을 흐리게 깔고 그 위에 스피너',
+    tokens: [
+      '--tbl-skeleton-bg',
+      '--tbl-loading-blur',
+      '--tbl-loading-overlay-bg',
+      '--tbl-spinner-track',
+      '--tbl-spinner-indicator',
+    ],
   },
   {
     title: '기타',

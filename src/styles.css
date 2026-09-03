@@ -109,6 +109,14 @@
     --tbl-edit-border: var(--tbl-sort-active);
     --tbl-edit-hover-bg: var(--tbl-row-hover-bg);
 
+    /* ---------- loading ---------- */
+    --tbl-skeleton-bg: #e8ebed;
+    /* How much the stand-in rows are softened behind the spinner. */
+    --tbl-loading-blur: 2px;
+    --tbl-loading-overlay-bg: rgb(255 255 255 / 0.55);
+    --tbl-spinner-track: #e8ebed;
+    --tbl-spinner-indicator: #1ad98a;
+
     /* ---------- misc ---------- */
     --tbl-empty-fg: #a2a6a9;
     --tbl-required-fg: #ff5630;

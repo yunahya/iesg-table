@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
 import {
-  type ColumnFiltersState,
   type ColumnOrderState,
   DataTable,
   type GroupingState,
@@ -18,11 +17,8 @@ import { baseColumns } from '../columns';
 import { type Emission, emissions, labels, num } from '../data';
 import { Code, DemoPage, Note, btn, btnOn, input } from '../ui';
 
-/* ------------------------------------------------------------------ */
-/* 검색 · 필터                                                          */
-/* ------------------------------------------------------------------ */
-
-const filterColumns: TableColumnDef<Emission>[] = [
+/** Shared by the column-visibility demo below. */
+const demoColumns: TableColumnDef<Emission>[] = [
   { accessorKey: 'category', header: '구분', meta: { width: 200 } },
   { accessorKey: 'facility', header: '사업장', meta: { width: 150 } },
   { accessorKey: 'scope', header: 'Scope', meta: { width: 90, align: 'center' } },
@@ -35,83 +31,13 @@ const filterColumns: TableColumnDef<Emission>[] = [
   { accessorKey: 'status', header: '상태', meta: { width: 110 } },
 ];
 
-export function Filtering() {
-  const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<ColumnFiltersState>([]);
-  const scope = filters.find((f) => f.id === 'scope')?.value as string | undefined;
-
-  return (
-    <DemoPage
-      title='검색 · 필터'
-      summary={
-        <>
-          모든 컬럼을 훑는 <Code>globalFilter</Code>와 컬럼 단위 <Code>columnFilters</Code> 두 가지가 있습니다. 이미
-          걸러진 데이터를 받는다면 <Code>manualFiltering</Code>을 켜세요 — 입력값은 그대로 전달되고, 테이블만 거르는
-          일을 멈춥니다.
-        </>
-      }
-      customization={[
-        '검색창 UI는 라이브러리가 그리지 않습니다 — 값만 넘기면 됩니다. 디자인은 전부 사용자 것입니다.',
-        <>
-          비교 방식은 컬럼의 <Code>filterFn</Code>으로 바꿉니다 (<Code>includesString</Code>, <Code>equalsString</Code>,
-          직접 작성 등).
-        </>,
-        <>
-          <Code>enableGlobalFilter: false</Code>로 특정 컬럼을 전역 검색 대상에서 뺄 수 있습니다.
-        </>,
-      ]}
-      api={[
-        ['globalFilter / onGlobalFilterChange', 'string', '전체 컬럼 대상 검색어.'],
-        ['columnFilters / onColumnFiltersChange', 'ColumnFiltersState', '컬럼별 필터 값 배열.'],
-        ['manualFiltering', 'boolean', '테이블이 거르지 않습니다. data가 이미 필터링되어 있다는 뜻.'],
-      ]}
-    >
-      <div className='space-y-3'>
-        <div className='flex flex-wrap items-center gap-2'>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder='전역 검색…'
-            className={`${input} w-52`}
-          />
-          <span className='text-slate-400 text-xs'>컬럼 필터:</span>
-          {['1', '2', '3'].map((value) => (
-            <button
-              key={value}
-              type='button'
-              className={scope === value ? btnOn : btn}
-              onClick={() => setFilters(scope === value ? [] : [{ id: 'scope', value }])}
-            >
-              Scope {value}
-            </button>
-          ))}
-        </div>
-
-        <DataTable
-          data={emissions}
-          columns={filterColumns}
-          getRowId={(row) => row.id}
-          labels={labels}
-          globalFilter={query}
-          onGlobalFilterChange={(updater) =>
-            setQuery((prev) => (typeof updater === 'function' ? (updater(prev) as string) : (updater as string)))
-          }
-          columnFilters={filters}
-          onColumnFiltersChange={setFilters}
-        />
-        <Note>전역 검색과 컬럼 필터는 AND로 걸립니다. 검색어를 지우면 필터만 남습니다.</Note>
-      </div>
-    </DemoPage>
-  );
-}
-
 /* ------------------------------------------------------------------ */
 /* 컬럼 표시                                                            */
 /* ------------------------------------------------------------------ */
 
 export function ColumnVisibility() {
   const [visibility, setVisibility] = useState<VisibilityState>({ status: false });
-  const toggleable = filterColumns as { accessorKey: string; header: string }[];
+  const toggleable = demoColumns as { accessorKey: string; header: string }[];
 
   return (
     <DemoPage
@@ -153,7 +79,7 @@ export function ColumnVisibility() {
         </div>
         <DataTable
           data={emissions}
-          columns={filterColumns}
+          columns={demoColumns}
           getRowId={(row) => row.id}
           labels={labels}
           columnVisibility={visibility}

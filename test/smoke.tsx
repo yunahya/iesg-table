@@ -110,6 +110,14 @@ function check(name: string, html: string, expectations: Array<[string, boolean]
     ['empty label', empty.includes('No data') && empty.includes('aria-live="polite"')],
     ['loading label', loading.includes('Loading…')],
     ['aria-busy', loading.includes('aria-busy="true"')],
+    // Loading keeps the scaffold: header sharp, stand-in rows blurred, spinner
+    // over the top — rather than blanking the table and making it jump.
+    ['header stays visible', loading.includes('Category') && loading.includes('tCO2eq')],
+    ['stand-in rows are drawn', (loading.match(/--tbl-skeleton-bg/g)?.length ?? 0) >= 5],
+    ['they are hidden from assistive tech', loading.includes('aria-hidden="true"')],
+    ['the body is blurred, not the header', loading.includes('--tbl-loading-blur')],
+    ['a spinner sits on top', loading.includes('animate-spin') && loading.includes('--tbl-spinner-indicator')],
+    ['column widths still come from colgroup', loading.includes('<col style="width:50px"/>')],
   ]);
 }
 

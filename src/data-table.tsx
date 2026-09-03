@@ -39,6 +39,7 @@ import type { TableCellEdit, TableColumnDef, TableColumnMeta } from './column-me
 import { TableCheckbox, type TableCheckboxProps } from './components/checkbox';
 import { EXPANDER_COLUMN_ID, Expander } from './components/expander';
 import { SortIcon, type SortIconProps } from './components/icons';
+import { LoadingOverlay, SkeletonRows } from './components/loading';
 import { type PaginationLabels, TablePagination } from './components/pagination';
 import { ROW_DRAG_COLUMN_ID, RowDragHandle } from './components/row-drag';
 import { useControllable } from './lib/controllable';
@@ -120,7 +121,14 @@ export interface DataTableProps<TData> {
   /** Stable row identity. Also the key used in `rowSelection.selectedIds`. */
   getRowId: (row: TData, index: number) => string;
   labels: TableLabels;
+  /**
+   * Shows the header over blurred stand-in rows with a spinner on top, rather
+   * than blanking the table. The column widths and row height stay put, so
+   * nothing jumps when the data lands.
+   */
   loading?: boolean;
+  /** How many stand-in rows to draw while loading. Defaults to 5. */
+  loadingRowCount?: number;
   rowSelection?: RowSelectionOptions;
 
   /* sorting */
@@ -323,6 +331,7 @@ export function DataTable<TData>({
   getRowId,
   labels,
   loading = false,
+  loadingRowCount = 5,
   rowSelection,
   sorting,
   onSortingChange,
@@ -791,9 +800,14 @@ export function DataTable<TData>({
         ))}
       </TableHeader>
 
-      <TableBody>
+      <TableBody
+        className={
+          // Blurring the tbody, not the whole table, keeps the header sharp.
+          loading ? 'pointer-events-none select-none blur-[var(--tbl-loading-blur)]' : undefined
+        }
+      >
         {loading ? (
-          <StatusRow colSpan={colSpan} label={labels.loading} />
+          <SkeletonRows columns={leafColumns} count={loadingRowCount} />
         ) : rows.length === 0 ? (
           <StatusRow colSpan={colSpan} label={labels.empty} />
         ) : (
@@ -807,11 +821,21 @@ export function DataTable<TData>({
     </Table>
   );
 
-  if (!pagination) return renderTable;
+  // The overlay is positioned against this wrapper rather than the scroll
+  // container, so it stays centred on the table instead of scrolling away.
+  // It is always present so that toggling `loading` does not remount the table.
+  const framed = (
+    <div className='relative'>
+      {renderTable}
+      {loading && <LoadingOverlay label={labels.loading} />}
+    </div>
+  );
+
+  if (!pagination) return framed;
 
   return (
     <div className='flex flex-col gap-2'>
-      {renderTable}
+      {framed}
       <TablePagination {...pagination} />
     </div>
   );

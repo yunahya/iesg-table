@@ -2,7 +2,7 @@ import type { ComponentType } from 'react';
 import { Reference } from './Reference';
 import { CellTypes, Pagination, Selection, Sorting, StatesAndTones, StatusStates } from './demos/basics';
 import { ComponentSlots, CustomCells, HandComposed, InlineEditing } from './demos/custom';
-import { ColumnReorder, ColumnVisibility, Export, Filtering, Grouping, RowReorder } from './demos/dataops';
+import { ColumnReorder, ColumnVisibility, Export, Grouping, RowReorder } from './demos/dataops';
 import { Expansion, Resizing, StickyAndPinning, Virtualised } from './demos/layout';
 import { Overview } from './demos/overview';
 
@@ -33,13 +33,12 @@ export const GROUPS: Group[] = [
       { id: 'pagination', label: '페이지네이션', hint: '서버 연동, 페이지 간 선택 유지', Component: Pagination },
       { id: 'cell-types', label: '셀 타입', hint: '13종 + custom, 행 높이는 그대로', Component: CellTypes },
       { id: 'states', label: '상태와 톤', hint: '두 축이 겹칠 때의 규칙', Component: StatesAndTones },
-      { id: 'status', label: '로딩 · 빈 상태', hint: '스크린리더에 읽히는 방식', Component: StatusStates },
+      { id: 'status', label: '로딩 · 빈 상태', hint: '스캐폴드 + 스피너, 빈 상태 행', Component: StatusStates },
     ],
   },
   {
     title: '데이터 다루기',
     entries: [
-      { id: 'filtering', label: '검색 · 필터', hint: '전역 검색과 컬럼 필터', Component: Filtering },
       { id: 'visibility', label: '컬럼 표시', hint: '숨기면 폭도 함께 사라집니다', Component: ColumnVisibility },
       { id: 'row-reorder', label: '행 순서 변경', hint: '드래그 또는 방향키', Component: RowReorder },
       { id: 'column-reorder', label: '컬럼 순서 변경', hint: '헤더를 잡아 끌기', Component: ColumnReorder },

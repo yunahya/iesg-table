@@ -14,7 +14,7 @@ import {
 } from '../../../src/index';
 import { baseColumns } from '../columns';
 import { type Emission, emissions, labels, paginationLabels } from '../data';
-import { Code, DemoPage, Note, Tag, btn } from '../ui';
+import { Code, DemoPage, Note, Tag, btn, btnOn } from '../ui';
 
 /* ------------------------------------------------------------------ */
 /* 정렬                                                                 */
@@ -472,37 +472,71 @@ export function StatesAndTones() {
 export function StatusStates() {
   const [loading, setLoading] = useState(true);
   const [hasData, setHasData] = useState(false);
+  const [rowCount, setRowCount] = useState(5);
 
   return (
     <DemoPage
       title='로딩 · 빈 상태'
       summary={
         <>
-          두 상태 모두 <Code>&lt;output aria-live=&quot;polite&quot;&gt;</Code>로 읽히고, 테이블에는{' '}
-          <Code>aria-busy</Code>가 붙습니다. 스크린리더가 &ldquo;데이터 없음&rdquo;을 놓치지 않습니다.
+          로딩 중에는 테이블을 비우지 않습니다. 헤더는 그대로 두고, 실제 컬럼으로 그린 대체 행을 흐리게 깔고, 그 위에
+          스피너를 얹습니다. 컬럼 폭과 행 높이가 데이터가 들어올 자리 그대로라 화면이 튀지 않습니다.
         </>
       }
       customization={[
         <>
+          대체 행 개수는 <Code>loadingRowCount</Code>입니다. 보통 페이지 크기와 맞춥니다.
+        </>,
+        <>
+          흐림 정도는 <Code>--tbl-loading-blur</Code>, 덮개 색은 <Code>--tbl-loading-overlay-bg</Code>, 스피너 색은{' '}
+          <Code>--tbl-spinner-indicator</Code>와 <Code>--tbl-spinner-track</Code>입니다. 흐림을 아예 끄려면{' '}
+          <Code>0</Code>을 넣으세요.
+        </>,
+        <>
           문구는 <Code>labels.loading</Code> / <Code>labels.empty</Code>입니다. 필수 prop이라 잊고 넘어갈 수 없습니다.
         </>,
         <>
-          글자색은 <Code>--tbl-empty-fg</Code>입니다.
-        </>,
-        <>
-          스켈레톤을 쓰고 싶다면 <Code>loading</Code> 대신 사용자 쪽에서 더미 데이터를 넣어 렌더링하면 됩니다.
+          완전히 다른 로딩 UI를 쓰고 싶다면 <Code>loading</Code>을 넘기지 말고 여러분 쪽에서 그리세요. 테이블은 받은
+          데이터만 그립니다.
         </>,
       ]}
-      tokens={['--tbl-empty-fg']}
+      api={[
+        ['loading', 'boolean', '스캐폴드 + 스피너를 켭니다.'],
+        ['loadingRowCount', 'number', '대체 행 개수. 기본 5.'],
+        ['labels.loading / labels.empty', 'string', '읽히는 문구.'],
+      ]}
+      tokens={[
+        '--tbl-skeleton-bg',
+        '--tbl-loading-blur',
+        '--tbl-loading-overlay-bg',
+        '--tbl-spinner-track',
+        '--tbl-spinner-indicator',
+        '--tbl-empty-fg',
+      ]}
+      caveats={[
+        '대체 행은 aria-hidden입니다 — 스크린리더에는 스피너 옆 문구만 읽힙니다. 가짜 내용을 읽어줄 이유가 없습니다.',
+        '움직임을 줄이도록 설정한 환경에서는 대체 행의 깜빡임이 꺼집니다. 스피너는 진행 중임을 알리는 유일한 신호라 그대로 돕니다.',
+      ]}
     >
       <div className='space-y-3'>
-        <div className='flex gap-2'>
-          <button type='button' className={btn} onClick={() => setLoading((v) => !v)}>
+        <div className='flex flex-wrap items-center gap-2'>
+          <button type='button' className={loading ? btnOn : btn} onClick={() => setLoading((v) => !v)}>
             loading: {String(loading)}
           </button>
           <button type='button' className={btn} onClick={() => setHasData((v) => !v)}>
-            data: {hasData ? '3 rows' : 'empty'}
+            data: {hasData ? '3행' : '없음'}
           </button>
+          <span className='text-slate-400 text-xs'>loadingRowCount:</span>
+          {[3, 5, 8].map((count) => (
+            <button
+              key={count}
+              type='button'
+              className={rowCount === count ? btnOn : btn}
+              onClick={() => setRowCount(count)}
+            >
+              {count}
+            </button>
+          ))}
         </div>
         <DataTable
           data={hasData ? emissions.slice(0, 3) : []}
@@ -510,7 +544,12 @@ export function StatusStates() {
           getRowId={(row) => row.id}
           labels={labels}
           loading={loading}
+          loadingRowCount={rowCount}
         />
+        <Note>
+          로딩을 끄고 데이터를 &lsquo;없음&rsquo;으로 두면 빈 상태가 나옵니다. 로딩을 켜면 데이터 유무와 상관없이
+          스캐폴드가 덮습니다 — 이전 데이터가 남아 새 데이터인 것처럼 보이는 일을 막습니다.
+        </Note>
       </div>
     </DemoPage>
   );
